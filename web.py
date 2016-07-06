@@ -4,7 +4,7 @@ from bottle import *
 from pro5 import *
 
 
-mofumofu = UserDatabase('/Users/NakanoYuki/Desktop/procon2016/sql/usser.db')
+mofumofu = UserDatabase('sql/usser.db')
 
 @route("/user/<team_name>/list")
 def UserList(team_name):

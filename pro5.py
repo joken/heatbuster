@@ -45,7 +45,7 @@ class UserDatabase(Database):
 
 from bottle import *
 
-mofumofu = UserDatabase('/Users/NakanoYuki/Desktop/procon2016/sql/usser.db')
+mofumofu = UserDatabase('sql/usser.db')
 
 @route("/user/<team_name>/list")
 def UserList(team_name):
