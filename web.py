@@ -12,7 +12,8 @@ def UserList(team_name):
 
 @route("/user/<team_name>/add")
 def UserAdd(team_name):
-	pass
+	return json.dumps(mofumofu.getUserList(team_name), ensure_ascii=False)
+
 
 # 起動する
 run(host='localhost', port=8080, debug=True, reloader=True)
