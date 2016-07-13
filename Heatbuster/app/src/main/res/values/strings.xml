@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Heatbuster</string>
+    <string name="title_activity_watch_clubs">WatchClubs</string>
+    <string name="title_activity_clubview">Clubview</string>
+</resources>
