@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 
 public class ClubmonitorAdapter extends BaseAdapter{
@@ -43,6 +45,9 @@ public class ClubmonitorAdapter extends BaseAdapter{
 
         TextView hobbyView = (TextView)convertView.findViewById(R.id.templaTextView);
         hobbyView.setText(clubmonitorsList.get(position).getClubTempla());
+
+        TextView templaRateView = (TextView)convertView.findViewById(R.id.templarateTextView);
+        templaRateView.setText(clubmonitorsList.get(position).getTemplaIncreaseRate());
 
         return convertView;
     }
