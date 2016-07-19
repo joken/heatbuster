@@ -2,6 +2,11 @@ package io.github.joken.heatbuster;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.ContextMenu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -25,5 +30,32 @@ public class MainActivity extends AppCompatActivity {
         ClubmonitorAdapter adapter = new ClubmonitorAdapter(MainActivity.this, personList);
 
         listView.setAdapter(adapter);
+        registerForContextMenu(listView);
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo){
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.listview1_context, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        switch (item.getItemId()) {
+            case R.id.connect_many:
+                return true;
+            case R.id.connect_one:
+                return true;
+            case R.id.reverce_all:
+                return true;
+            case R.id.reverce_one:
+                return true;
+            case R.id.delete:
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
     }
 }
