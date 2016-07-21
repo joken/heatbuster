@@ -3,9 +3,11 @@ package io.github.joken.heatbuster;
 import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.ContextMenu;
+import android.view.KeyEvent;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -71,5 +74,19 @@ public class MainActivity extends AppCompatActivity {
             default:
                 return super.onContextItemSelected(item);
         }
+    }
+
+    @Override
+    public void onBackPressed(){
+        Toast.makeText(this, "長押しで終了", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public boolean onKeyLongPress(int Keycode, KeyEvent e){
+        if (Keycode==KeyEvent.KEYCODE_BACK){
+            finish();
+            return true;
+        }
+        return super.onKeyLongPress(Keycode,e);
     }
 }
