@@ -16,4 +16,5 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <string name="title_activity_pairing">接続する子機を確認したら決定してください</string>
 </resources>

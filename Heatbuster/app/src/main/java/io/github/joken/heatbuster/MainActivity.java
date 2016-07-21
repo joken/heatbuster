@@ -57,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         switch (item.getItemId()) {
             case R.id.connect_many:
+                Intent intent = new Intent(getApplication(), PairingActivity.class);
+                startActivity(intent);
                 return true;
             case R.id.connect_one:
                 return true;

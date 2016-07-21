@@ -15,8 +15,7 @@ public class JoinclubActivity extends AppCompatActivity {
         setContentView(R.layout.activity_joinclub);
 
         //ListViewのセット
-        ListView listView = new ListView(this);
-        setContentView(listView);
+        ListView listView = (ListView)findViewById(R.id.joinclub);
 
         //データの追加
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
