@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">BLEtest</string>
+    <string name="ble_not_supported">Oops,this device dosen't support BLE.</string>
+</resources>
