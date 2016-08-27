@@ -4,9 +4,12 @@ import android.Manifest;
 import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCallback;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
-import android.bluetooth.le.BluetoothLeScanner;
-import android.bluetooth.le.ScanCallback;
+import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -19,6 +22,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import java.util.List;
+import java.util.UUID;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_ENABLE_BT = 1;
@@ -30,7 +36,10 @@ public class MainActivity extends AppCompatActivity {
 
     private Handler mHandler = new Handler();
     private BluetoothAdapter mBluetoothAdapter;
+    private BluetoothGatt mBluetoothGatt;
     boolean mScanning=false;
+    private final String TAG = "hogehoge";
+    private BluetoothGattCharacteristic mBluetoothCharacteristic;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,6 +135,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
             // スキャンできた端末の情報をログ出力
+            // なおuuidはnullの模様(使わないからOK)
             ParcelUuid[] uuids = device.getUuids();
             String uuid = "";
             if (uuids != null) {
@@ -138,7 +148,59 @@ public class MainActivity extends AppCompatActivity {
                     + device.getAddress() + ", type" + device.getType()
                     + ", uuids=" + uuid;
             Log.d("BLEActivity", msg);
-
+            if (device.getAddress().substring(0,2).equals("FB")){
+                mBluetoothGatt = device.connectGatt(getApplicationContext(), false, mGattCallback);
+                mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                Log.d("connect!!!!!!!!!!!!!!!",msg);
+            }
         }
     };
+
+    private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
+        @Override
+        public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+            super.onConnectionStateChange(gatt, status, newState);
+            //接続された
+            if (newState == BluetoothProfile.STATE_CONNECTED){
+                Log.i(TAG, "Connected to GATT server.");
+                // サービスを検索する
+                Log.i(TAG, "Attempting to start service discovery:" + mBluetoothGatt.discoverServices());
+                // 切断された
+            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                Log.i(TAG, "Disconnected from GATT server.");
+            }
+        }
+
+        @Override
+        public void onServicesDiscovered(BluetoothGatt gatt, int status){
+            Log.d(TAG, "onServicesDiscovered received: " + status);
+            if (status == BluetoothGatt.GATT_SUCCESS){
+                //サービスのリストを取得
+                List <BluetoothGattService> serviceList = gatt.getServices();
+                for (BluetoothGattService service : serviceList){
+                    //サービスからCharacteristicのリストを取得
+                    List <BluetoothGattCharacteristic> charastic = service.getCharacteristics();
+                    //CharacteristicにNotificationの受信要求を設定
+                    for (BluetoothGattCharacteristic characteristic: charastic){
+                        gatt.setCharacteristicNotification(characteristic, true);
+                    }
+                }
+            } else {
+                Log.w(TAG,"onServicesDiscovered received: " + status);
+            }
+        }
+
+        //読み込み通知
+        @Override
+        public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                // Characteristicの読込成功
+            }
+        }
+    };
+
+    public void onClickRead(View v){
+        //BluetoothGattに対して読み込み要求をする。
+        mBluetoothGatt.readCharacteristic(mBluetoothCharacteristic);
+    }
 }

@@ -14,7 +14,7 @@
         android:id="@+id/clublistView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"></ListView>
+        android:layout_weight="1" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
