@@ -183,6 +183,10 @@ public class MainActivity extends AppCompatActivity {
                     //CharacteristicにNotificationの受信要求を設定
                     for (BluetoothGattCharacteristic characteristic: charastic){
                         gatt.setCharacteristicNotification(characteristic, true);
+                        Log.d("Characteristic_Uuid:",characteristic.getUuid().toString());
+                        if (characteristic.getUuid().toString().substring(0,2).equals("1d")){
+                            mBluetoothCharacteristic=characteristic;
+                        }
                     }
                 }
             } else {
@@ -202,5 +206,6 @@ public class MainActivity extends AppCompatActivity {
     public void onClickRead(View v){
         //BluetoothGattに対して読み込み要求をする。
         mBluetoothGatt.readCharacteristic(mBluetoothCharacteristic);
+        Log.d(TAG,"reaaaaaaaad!!!!");
     }
 }
