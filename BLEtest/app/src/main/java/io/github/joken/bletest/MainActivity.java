@@ -176,33 +176,41 @@ public class MainActivity extends AppCompatActivity {
         public void onServicesDiscovered(BluetoothGatt gatt, int status){
             Log.d(TAG, "onServicesDiscovered received: " + status);
             if (status == BluetoothGatt.GATT_SUCCESS){
+                Log.i(TAG,"poyo!");
                 //サービスのリストを取得
                 List <BluetoothGattService> serviceList = gatt.getServices();
                 for (BluetoothGattService service : serviceList){
+                    Log.i(TAG,"poyo!");
                     //サービスからCharacteristicのリストを取得
                     List <BluetoothGattCharacteristic> charastic = service.getCharacteristics();
                     //CharacteristicにNotificationの受信要求を設定
+
+
                     for (BluetoothGattCharacteristic characteristic: charastic){
-                        gatt.setCharacteristicNotification(characteristic, true);
-                        Log.d("Characteristic_status:",String.valueOf(characteristic.getProperties()));
+                        Log.d(TAG,"ここまではきたきたきた");
                         if (characteristic.getUuid().toString().substring(0,2).equals("1d")){
+                            Log.i(TAG,"ifに入った");
                             mBluetoothCharacteristic=characteristic;
                         }
                     }
                 }
-                String CHARACTERISTIC_CONFIG = "00002902-0000-1000-8000-00805f9b34fb";
-
-                // Characteristic の Notification 有効化
-                BluetoothGattDescriptor descriptor = mBluetoothCharacteristic.getDescriptor(UUID.fromString(CHARACTERISTIC_CONFIG));
-                descriptor.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
-                boolean writed = gatt.writeDescriptor(descriptor);
-                Log.i(TAG,String.valueOf(writed));
-
             } else {
                 Log.w(TAG,"onServicesDiscovered received: " + status);
             }
         }
 
+        @Override
+        public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                // Characteristicの読込成功
+                byte[] read_data = characteristic.getValue();
+                Log.i(TAG, "data = "  + "温度[1]" +read_data[1]+"温度[2]" +read_data[2]+"emergency"+read_data[3]+"指数部byte"+read_data[4]
+                        +"水蒸気量データ[6]"+read_data[6]+"水蒸気量データ[7]"+read_data[7]+"水蒸気量データ[8]"+read_data[8]+"指数部byte"+read_data[9]);
+                Log.i(TAG, "data = "  +read_data[1]+"-" +read_data[2]+"-"+read_data[3]+"-"+read_data[4]
+                        +"-"+read_data[6]+"-"+read_data[7]+"-"+read_data[8]+"-"+read_data[9]);
+            }
+        }
+        /*
         //Notification/Indicateの受信コールバック
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic){
@@ -212,9 +220,11 @@ public class MainActivity extends AppCompatActivity {
             Log.i(TAG, "data = "  + "温度[1]" +read_data[1]+"温度[2]" +read_data[2]+"emergency"+read_data[3]+"指数部byte"+read_data[4]
             +"水蒸気量データ[6]"+read_data[6]+"水蒸気量データ[7]"+read_data[7]+"水蒸気量データ[8]"+read_data[8]+"指数部byte"+read_data[9]);
         }
+        */
     };
 
     public void onClickBreak(View v){
-        Log.i(TAG,"なにもシナイｙー");
+        mBluetoothGatt.readCharacteristic(mBluetoothCharacteristic);
+        Log.d(TAG,"ここまでは来ました");
     }
 }

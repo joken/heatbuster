@@ -30,7 +30,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="break"
+        android:text="read"
         android:onClick="onClickBreak"/>
 
 </LinearLayout>
