@@ -28,11 +28,11 @@ public class MainActivity extends AppCompatActivity {
 
         ListView listView = (ListView)findViewById(R.id.clublistView);
         ArrayList<Clubmonitor> personList = new ArrayList<Clubmonitor>();
-        personList.add(new Clubmonitor("野球部", 29.3f,R.drawable.ic_sad));
-        personList.add(new Clubmonitor("サッカー部", 27.4f,R.drawable.ic_smile));
-        personList.add(new Clubmonitor("テニス部", 41.2f,R.drawable.ic_die));
-        personList.add(new Clubmonitor("女子バレー部", 28.9f,R.drawable.ic_sad));
-        personList.add(new Clubmonitor("卓球部", 40.6f,R.drawable.ic_die));
+        personList.add(new Clubmonitor("野球部", 29.3f,TemperatureStatus.Warning));
+        personList.add(new Clubmonitor("サッカー部", 27.4f,TemperatureStatus.Safe));
+        personList.add(new Clubmonitor("テニス部", 41.2f,TemperatureStatus.Emergency));
+        personList.add(new Clubmonitor("女子バレー部", 28.9f,TemperatureStatus.Warning));
+        personList.add(new Clubmonitor("卓球部", 40.6f,TemperatureStatus.Emergency));
         ClubmonitorAdapter adapter = new ClubmonitorAdapter(MainActivity.this, personList);
 
         listView.setAdapter(adapter);

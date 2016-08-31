@@ -8,8 +8,6 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 
 public class ClubmonitorAdapter extends BaseAdapter{
@@ -45,13 +43,13 @@ public class ClubmonitorAdapter extends BaseAdapter{
         nameView.setText(clubmonitorsList.get(position).getName());
 
         TextView hobbyView = (TextView)convertView.findViewById(R.id.templaTextView);
-        hobbyView.setText(clubmonitorsList.get(position).getClubTempla());
+        hobbyView.setText(clubmonitorsList.get(position).getClubTemp());
 
         TextView templaRateView = (TextView)convertView.findViewById(R.id.templarateTextView);
-        templaRateView.setText(clubmonitorsList.get(position).getTemplaIncreaseRate());
+        templaRateView.setText(clubmonitorsList.get(position).getTempIncreaseRate());
 
         ImageView clubStatusImage = (ImageView) convertView.findViewById(R.id.item_image);
-        clubStatusImage.setImageResource(clubmonitorsList.get(position).getImageID());
+        clubStatusImage.setImageResource(clubmonitorsList.get(position).getSelfStatus().getImageID());
 
         return convertView;
     }

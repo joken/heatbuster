@@ -4,28 +4,28 @@ public class Clubmonitor {
     //部活名
     private String clubname;
     //部活に所属している人の平均温度
-    private float clubTempla=0f;
+    private float clubTemp;
     //clubTemplaの体温上昇率
-    private float templaIncreaseRate=0f;
-    //画像
-    private int imageID;
+    private float tempIncreaseRate;
+    //状態
+    private TemperatureStatus selfStatus;
 
-    public Clubmonitor(String clubname, float clubTempla, int imageID){
+    public Clubmonitor(String clubname, float clubTemp, TemperatureStatus selfStatus){
         this.clubname = clubname;
-        this.clubTempla = clubTempla;
-        this.imageID=imageID;
+        this.clubTemp = clubTemp;
+        this.selfStatus = selfStatus;
     }
 
     public String getName(){
         return this.clubname;
     }
 
-    public String getClubTempla(){
-        return "平均深層体温:"+ String.valueOf(this.clubTempla)+"℃";
+    public String getClubTemp(){
+        return "平均深層体温:"+ String.valueOf(this.clubTemp)+"℃";
     }
 
-    public String getTemplaIncreaseRate() { return "体温上昇率:" + String.valueOf(this.templaIncreaseRate)+"%";}
+    public String getTempIncreaseRate() { return "体温上昇率:" + String.valueOf(this.tempIncreaseRate)+"%";}
 
-    public int getImageID() {return imageID;}
+    public TemperatureStatus getSelfStatus() {return selfStatus;}
 
 }
