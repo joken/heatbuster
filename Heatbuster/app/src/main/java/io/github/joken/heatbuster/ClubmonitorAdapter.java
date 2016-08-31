@@ -8,6 +8,10 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.beardedhen.androidbootstrap.AwesomeTextView;
+import com.beardedhen.androidbootstrap.api.attributes.BootstrapBrand;
+import com.beardedhen.androidbootstrap.api.defaults.DefaultBootstrapBrand;
+
 import java.util.ArrayList;
 
 public class ClubmonitorAdapter extends BaseAdapter{
@@ -50,6 +54,10 @@ public class ClubmonitorAdapter extends BaseAdapter{
 
         ImageView clubStatusImage = (ImageView) convertView.findViewById(R.id.item_image);
         clubStatusImage.setImageResource(clubmonitorsList.get(position).getSelfStatus().getImageID());
+
+        AwesomeTextView statusText = (AwesomeTextView)convertView.findViewById(R.id.tempStatusText);
+        statusText.setBootstrapBrand(clubmonitorsList.get(position).getSelfStatus().getBrand());
+        statusText.setText(clubmonitorsList.get(position).getSelfStatus().getStatusText());
 
         return convertView;
     }
