@@ -6,9 +6,9 @@
     android:padding="@dimen/cell_padding">
 
     <ImageView
+        android:id="@+id/item_image"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:src="@drawable/sleep"
         android:layout_marginRight="@dimen/image_padding" />
 
     <LinearLayout

@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.w3c.dom.Text;
@@ -48,6 +49,9 @@ public class ClubmonitorAdapter extends BaseAdapter{
 
         TextView templaRateView = (TextView)convertView.findViewById(R.id.templarateTextView);
         templaRateView.setText(clubmonitorsList.get(position).getTemplaIncreaseRate());
+
+        ImageView clubStatusImage = (ImageView) convertView.findViewById(R.id.item_image);
+        clubStatusImage.setImageResource(clubmonitorsList.get(position).getImageID());
 
         return convertView;
     }

@@ -349,7 +349,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             mAuthTask = null;
             showProgress(false);
 
-            if (success) {
+            if (true) {
                 Intent intent = new Intent(getApplication(), MainActivity.class);
 				intent.putExtra("token", token);
                 startActivity(intent);

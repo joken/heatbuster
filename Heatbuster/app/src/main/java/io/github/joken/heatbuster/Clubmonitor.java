@@ -7,10 +7,13 @@ public class Clubmonitor {
     private float clubTempla=0f;
     //clubTemplaの体温上昇率
     private float templaIncreaseRate=0f;
+    //画像
+    private int imageID;
 
-    public Clubmonitor(String clubname, float clubTempla){
+    public Clubmonitor(String clubname, float clubTempla, int imageID){
         this.clubname = clubname;
         this.clubTempla = clubTempla;
+        this.imageID=imageID;
     }
 
     public String getName(){
@@ -22,5 +25,7 @@ public class Clubmonitor {
     }
 
     public String getTemplaIncreaseRate() { return "体温上昇率:" + String.valueOf(this.templaIncreaseRate)+"%";}
+
+    public int getImageID() {return imageID;}
 
 }

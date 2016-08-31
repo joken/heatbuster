@@ -28,11 +28,11 @@ public class MainActivity extends AppCompatActivity {
 
         ListView listView = (ListView)findViewById(R.id.clublistView);
         ArrayList<Clubmonitor> personList = new ArrayList<Clubmonitor>();
-        personList.add(new Clubmonitor("やきう部", 30.1f));
-        personList.add(new Clubmonitor("サッカー部", 20.7f));
-        personList.add(new Clubmonitor("hoge", 1145.14f));
-        personList.add(new Clubmonitor("pito", 81.21f));
-        personList.add(new Clubmonitor("DJRN", -23.5f));
+        personList.add(new Clubmonitor("野球部", 29.3f,R.drawable.ic_sad));
+        personList.add(new Clubmonitor("サッカー部", 27.4f,R.drawable.ic_smile));
+        personList.add(new Clubmonitor("テニス部", 41.2f,R.drawable.ic_die));
+        personList.add(new Clubmonitor("女子バレー部", 28.9f,R.drawable.ic_sad));
+        personList.add(new Clubmonitor("卓球部", 40.6f,R.drawable.ic_die));
         ClubmonitorAdapter adapter = new ClubmonitorAdapter(MainActivity.this, personList);
 
         listView.setAdapter(adapter);
@@ -59,15 +59,13 @@ public class MainActivity extends AppCompatActivity {
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         switch (item.getItemId()) {
-            case R.id.connect_many:
+            case R.id.connect:
                 Intent intent = new Intent(getApplication(), PairingActivity.class);
                 startActivity(intent);
                 return true;
-            case R.id.connect_one:
+            case R.id.reverce_one:
                 return true;
             case R.id.reverce_all:
-                return true;
-            case R.id.reverce_one:
                 return true;
             case R.id.delete:
                 return true;
