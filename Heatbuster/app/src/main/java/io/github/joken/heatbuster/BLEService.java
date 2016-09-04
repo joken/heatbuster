@@ -21,11 +21,10 @@ public class BLEService extends Service {
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		// TODO: Return the communication channel to the service.
-		throw new UnsupportedOperationException("Not yet implemented");
+		return this.mMessenger.getBinder();
 	}
 
-	static  class MessageHandler extends Handler{
+	static class MessageHandler extends Handler{
 		private Context mContext;
 
 		public MessageHandler(Context ct){

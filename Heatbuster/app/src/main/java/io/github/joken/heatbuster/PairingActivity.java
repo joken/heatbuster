@@ -1,40 +1,40 @@
 package io.github.joken.heatbuster;
 
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class PairingActivity extends AppCompatActivity {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_pairing);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+	@BindView(R.id.pairinglist)
+	ListView pairingList;
 
-        //ListViewのセット
-        ListView listView = (ListView)findViewById(R.id.pairinglist);
+	/** 発見されたBLEデバイス名を格納する */
+	private ArrayAdapter<String> pairAdapter;
 
-        //データの追加
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
-        adapter.add("f45d1fsa51e5fae1");
-        adapter.add("fdfa5f1dwafds12");
-        adapter.add("f1d5f15asd1fae");
-        listView.setAdapter(adapter);
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_pairing);
+		ButterKnife.bind(this);
+		//ToolBarをActionBar化
+		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-            }
-        });
-    }
+		//ListViewにAdapterを登録
+		setPairAdapter();
+
+	}
+
+
+	private void setPairAdapter(){
+		pairAdapter = new ArrayAdapter<>(this.getApplicationContext(), android.R.layout.simple_list_item_1);
+		pairingList.setAdapter(pairAdapter);
+	}
 
 }
