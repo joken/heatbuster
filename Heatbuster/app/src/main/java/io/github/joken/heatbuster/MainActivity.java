@@ -2,10 +2,13 @@ package io.github.joken.heatbuster;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -32,6 +35,8 @@ public class MainActivity extends AppCompatActivity {
 	private ClubmonitorAdapter clubAdapter;
 	/** 権限チェック後にリクエストが自分のものであったか確認する定数(値に意味はない) */
 	private static int BLE_LOCATION_REQUEST_CODE = 9999;
+	/** ユーザーのToken */
+	private String mToken;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +63,9 @@ public class MainActivity extends AppCompatActivity {
 				startActivity(intent);
 			}
 		});
+
+		//tokenを取得しておく
+		mToken = this.getIntent().getStringExtra("token");
 
 		//BLEの諸々とした確認
 		checkBLE();
@@ -115,7 +123,10 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	private void startBLEservice(){
-		//TODO BLEServiceを呼び起こす
+		//tokenを元にBLEServiceを呼び起こす
+		Intent it = new Intent(MainActivity.this, BLEService.class);
+		it.putExtra("token", mToken);
+		startService(it);
 	}
 
 	@TargetApi(Build.VERSION_CODES.M)
@@ -147,6 +158,18 @@ public class MainActivity extends AppCompatActivity {
 
 	private void showToast(String text){
 		Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
+	}
+
+	private class BLEConnection implements ServiceConnection{
+		@Override
+		public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName componentName) {
+
+		}
 	}
 
 }
