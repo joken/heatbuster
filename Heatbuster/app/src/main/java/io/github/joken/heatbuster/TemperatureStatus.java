@@ -7,7 +7,7 @@ import com.beardedhen.androidbootstrap.api.defaults.DefaultBootstrapBrand;
  * 温度しきい値に応じた状態表示
  */
 public enum TemperatureStatus {
-	Emergency(R.drawable.ic_die, DefaultBootstrapBrand.DANGER),
+	Emergency(R.drawable.ic_die, DefaultBootstrapBrand.SECONDARY),
 	Warning(R.drawable.ic_sad, DefaultBootstrapBrand.WARNING),
 	Safe(R.drawable.ic_smile, DefaultBootstrapBrand.PRIMARY);
 

@@ -45,11 +45,11 @@ public class MainActivity extends AppCompatActivity {
 		ButterKnife.bind(this);
 
 		ArrayList<Clubmonitor> personList = new ArrayList<Clubmonitor>();
-		personList.add(new Clubmonitor("野球部", 29.3f, TemperatureStatus.Warning));
+		personList.add(new Clubmonitor("野球部", 41.2f, TemperatureStatus.Emergency));
 		personList.add(new Clubmonitor("サッカー部", 27.4f, TemperatureStatus.Safe));
-		personList.add(new Clubmonitor("テニス部", 41.2f, TemperatureStatus.Emergency));
+		personList.add(new Clubmonitor("テニス部", 26.7f, TemperatureStatus.Safe));
 		personList.add(new Clubmonitor("女子バレー部", 28.9f, TemperatureStatus.Warning));
-		personList.add(new Clubmonitor("卓球部", 40.6f, TemperatureStatus.Emergency));
+		personList.add(new Clubmonitor("卓球部", 27.2f, TemperatureStatus.Safe));
 		clubAdapter = new ClubmonitorAdapter(MainActivity.this, personList);
 
 		clublistView.setAdapter(clubAdapter);

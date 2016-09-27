@@ -27,11 +27,11 @@ public class PairingActivity extends AppCompatActivity {
 		ButterKnife.bind(this);
 
         ArrayList<CheckBoxItem> pairbleList = new ArrayList<CheckBoxItem>();
-        pairbleList.add(new CheckBoxItem("fjhkdlsa"));
-        pairbleList.add(new CheckBoxItem("idfjaslk"));
-        pairbleList.add(new CheckBoxItem("j4h34hjk"));
-        pairbleList.add(new CheckBoxItem("65jk6l3k"));
-        pairbleList.add(new CheckBoxItem("p45oj3k5"));
+        pairbleList.add(new CheckBoxItem("k4z9yc"));
+        pairbleList.add(new CheckBoxItem("z8mwf4"));
+        pairbleList.add(new CheckBoxItem("8xsdxg"));
+        pairbleList.add(new CheckBoxItem("zp29gy"));
+        pairbleList.add(new CheckBoxItem("jawfyf"));
         checkAdaper = new CheckboxListAdapter(PairingActivity.this,pairbleList);
 
         pairingList.setAdapter(checkAdaper);
