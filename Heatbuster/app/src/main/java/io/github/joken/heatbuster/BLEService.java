@@ -5,12 +5,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.Messenger;
 
 public class BLEService extends Service {
 	private Messenger mMessenger;
+	private String token;
 
 	public BLEService() {
+	}
+
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId){
+		token = intent.getStringExtra("token");
+		return START_STICKY;
 	}
 
 	@Override
@@ -30,6 +38,9 @@ public class BLEService extends Service {
 		public MessageHandler(Context ct){
 			this.mContext = ct;
 		}
+
+		@Override
+		public void handleMessage(Message msg){}
 
 	}
 }
