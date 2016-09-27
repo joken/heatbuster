@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.beardedhen.androidbootstrap.AwesomeTextView;
@@ -43,6 +44,11 @@ public class ClubmonitorAdapter extends BaseAdapter{
     @Override
     public View getView(int position, View convertView, ViewGroup parent){
         convertView = layoutInflater.inflate(R.layout.club_listview_cell, parent, false);
+        LinearLayout linearLayout = (LinearLayout)convertView.findViewById(R.id.cellBackground);
+        if (clubmonitorsList.get(position).getSelfStatus()==(TemperatureStatus.Emergency)){
+            linearLayout.setBackgroundColor(0xffff4444);
+        }
+
         TextView nameView = (TextView)convertView.findViewById(R.id.clubnameTextView);
         nameView.setText(clubmonitorsList.get(position).getName());
 
