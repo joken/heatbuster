@@ -1,6 +1,9 @@
 package io.github.joken.heatbuster;
 
+import android.content.ComponentName;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.ArrayAdapter;
@@ -35,6 +38,19 @@ public class PairingActivity extends AppCompatActivity {
 	private void setPairAdapter(){
 		pairAdapter = new ArrayAdapter<>(this.getApplicationContext(), android.R.layout.simple_list_item_1);
 		pairingList.setAdapter(pairAdapter);
+	}
+
+	private class BLEConnection implements ServiceConnection {
+		/** Serviceに接続したときに実行 */
+		@Override
+		public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName componentName) {
+
+		}
 	}
 
 }

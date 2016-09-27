@@ -160,16 +160,4 @@ public class MainActivity extends AppCompatActivity {
 		Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
 	}
 
-	private class BLEConnection implements ServiceConnection{
-		@Override
-		public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-
-		}
-
-		@Override
-		public void onServiceDisconnected(ComponentName componentName) {
-
-		}
-	}
-
 }
