@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/holo_red_light"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="io.github.joken.heatbuster.WorningActivity">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_die" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="野球部で熱中症が発生しました。\n"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="#fafafa"
+        android:textSize="46dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="野球部では現在、熱中症の疑いがある生徒が検知されています。すぐさま部活動を中断し、疑いの見られる生徒を保健室に連れていき、他の部員に水分補給及び日陰での休憩を薦めます。\n\n"
+        android:textColor="#fafafa"
+        android:textSize="30dp" />
+
+    <Button
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="了解"
+        android:textSize="30dp"
+        android:onClick="onClickOK"/>
+
+</LinearLayout>
