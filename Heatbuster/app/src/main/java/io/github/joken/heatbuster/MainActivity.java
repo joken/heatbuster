@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements ServiceConnection{
+public class MainActivity extends AppCompatActivity implements  ServiceConnection{
 
 	@BindView(R.id.clublistView)
 	ListView clublistView;
@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 	/** 部活動リスト */
 	private ClubmonitorAdapter clubAdapter;
 	/** 権限チェック後にリクエストが自分のものであったか確認する定数(値に意味はない) */
-	private static final int BLE_LOCATION_REQUEST_CODE = 9999;
+	private static int BLE_LOCATION_REQUEST_CODE = 9999;
 	public static final int PAIRING_REQUEST_CODE = 1919;
 	/** ユーザーのToken */
 	private String mToken;
@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 		switch (item.getItemId()) {
 			case R.id.connect:
 				Intent intent = new Intent(getApplication(), PairingActivity.class);
-				startActivityForResult(intent,PAIRING_REQUEST_CODE);
+				startActivityForResult(intent, PAIRING_REQUEST_CODE);
 				return true;
 			case R.id.reverce_one:
 				return true;
