@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 	/** 権限チェック後にリクエストが自分のものであったか確認する定数(値に意味はない) */
 	private static int BLE_LOCATION_REQUEST_CODE = 9999;
 	public static final int PAIRING_REQUEST_CODE = 1919;
+	public static final int JOIN_REQUEST_CODE = 2525;
 	/** ユーザーのToken */
 	private String mToken;
 
@@ -61,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 			@Override
 			public void onClick(View view) {
 				Intent intent = new Intent(getApplication(), JoinclubActivity.class);
-				startActivity(intent);
+				startActivityForResult(intent, JOIN_REQUEST_CODE);
 			}
 		});
 
@@ -120,6 +121,12 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 				if(resultcode == RESULT_OK){
 					ArrayList<CheckBoxItem> pairList = (ArrayList<CheckBoxItem>) data.getSerializableExtra("pairlist");
 					sendPairList(pairList);
+				}
+				break;
+			case JOIN_REQUEST_CODE:
+				if(resultcode==RESULT_OK){
+					ArrayList<CheckBoxItem> joinList = (ArrayList<CheckBoxItem>) data.getSerializableExtra("joinlist");
+					//TODO ちゃんとclubを追加する
 				}
 				break;
 		}

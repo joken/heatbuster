@@ -1,13 +1,9 @@
 package io.github.joken.heatbuster;
 
-import android.content.ComponentName;
-import android.content.ServiceConnection;
-import android.os.IBinder;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.util.ArrayList;
