@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ServiceConnection{
 
 	@BindView(R.id.clublistView)
 	ListView clublistView;
@@ -34,7 +34,8 @@ public class MainActivity extends AppCompatActivity {
 	/** 部活動リスト */
 	private ClubmonitorAdapter clubAdapter;
 	/** 権限チェック後にリクエストが自分のものであったか確認する定数(値に意味はない) */
-	private static int BLE_LOCATION_REQUEST_CODE = 9999;
+	private static final int BLE_LOCATION_REQUEST_CODE = 9999;
+	public static final int PAIRING_REQUEST_CODE = 1919;
 	/** ユーザーのToken */
 	private String mToken;
 
@@ -84,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
 		switch (item.getItemId()) {
 			case R.id.connect:
 				Intent intent = new Intent(getApplication(), PairingActivity.class);
-				startActivity(intent);
+				startActivityForResult(intent,PAIRING_REQUEST_CODE);
 				return true;
 			case R.id.reverce_one:
 				return true;
@@ -109,6 +110,19 @@ public class MainActivity extends AppCompatActivity {
 			return true;
 		}
 		return super.onKeyLongPress(Keycode, e);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	protected void onActivityResult(int requestcode, int resultcode, Intent data){
+		switch (requestcode){
+			case PAIRING_REQUEST_CODE:
+				if(resultcode == RESULT_OK){
+					ArrayList<CheckBoxItem> pairList = (ArrayList<CheckBoxItem>) data.getSerializableExtra("pairlist");
+					sendPairList(pairList);
+				}
+				break;
+		}
 	}
 
 	private void checkBLE(){
@@ -160,16 +174,19 @@ public class MainActivity extends AppCompatActivity {
 		Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
 	}
 
-	private class BLEConnection implements ServiceConnection{
-		@Override
-		public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+	/**BLEServiceとのConnectionをとる*/
+	@Override
+	public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
 
-		}
+	}
 
-		@Override
-		public void onServiceDisconnected(ComponentName componentName) {
+	@Override
+	public void onServiceDisconnected(ComponentName componentName) {
 
-		}
+	}
+
+	public void sendPairList(ArrayList<CheckBoxItem> list) {
+		//TODO リストをServiceに放り投げる
 	}
 
 }
