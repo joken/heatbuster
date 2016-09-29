@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -18,7 +19,6 @@ public class PairingActivity extends AppCompatActivity {
     ListView pairingList;
 
 	/** 発見されたBLEデバイス名を格納する */
-	//private ArrayAdapter<String> pairAdapter;
 	private CheckboxListAdapter checkAdaper;
 
 	@Override
@@ -35,6 +35,7 @@ public class PairingActivity extends AppCompatActivity {
         pairbleList.add(new CheckBoxItem("jawfyf"));
         checkAdaper = new CheckboxListAdapter(PairingActivity.this,pairbleList);
 
+		//ListViewにAdapterを登録
         pairingList.setAdapter(checkAdaper);
         registerForContextMenu(pairingList);
 
@@ -42,16 +43,8 @@ public class PairingActivity extends AppCompatActivity {
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 
-        //ListViewにAdapterを登録
-        //setPairAdapter();
-
 	}
 
-
-	private void setPairAdapter(){
-		//pairAdapter = new ArrayAdapter<>(this.getApplicationContext(), android.R.layout.simple_list_item_1);
-		//pairingList.setAdapter(pairAdapter);
-	}
 
     @OnClick(R.id.addpairbutton)
     public void onClick() {
@@ -59,6 +52,10 @@ public class PairingActivity extends AppCompatActivity {
         for(CheckBoxItem item : checkAdaper.checkBoxItemsList){
             if(item.getChecked())checked.add(item);
         }
+		if(checked.isEmpty()){
+			Toast.makeText(this.getApplicationContext(),"1つ以上の子機を選択してください。",Toast.LENGTH_LONG).show();
+			return;
+		}
         Intent intent = new Intent();
         intent.putExtra("pairlist",checked);
         setResult(RESULT_OK,intent);
