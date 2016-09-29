@@ -216,7 +216,7 @@ public class LoginActivity extends Activity {
 			if (true) {//TODO デバッグ終了後に条件文に変更する
 				Intent intent = new Intent(getApplication(), MainActivity.class);
 				intent.putExtra("token", token);
-				setResult(RESULT_OK);
+				setResult(RESULT_OK, intent);
 				finish();
 			} else {
 				mPasswordView.setError(getString(R.string.error_incorrect_password));
