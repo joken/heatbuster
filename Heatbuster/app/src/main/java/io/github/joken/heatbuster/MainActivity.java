@@ -5,10 +5,12 @@ import android.annotation.TargetApi;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.Preference;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -25,6 +27,7 @@ import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import com.orhanobut.hawk;
 
 public class MainActivity extends AppCompatActivity implements  ServiceConnection{
 
@@ -33,10 +36,11 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 
 	/** 部活動リスト */
 	private ClubmonitorAdapter clubAdapter;
-	/** 権限チェック後にリクエストが自分のものであったか確認する定数(値に意味はない) */
-	private static int BLE_LOCATION_REQUEST_CODE = 9999;
+	/** 権限チェックまたはStartActivityForResult使用後にリクエストが自分のものであったか確認する定数(一意であればOK) */
+	private static final int BLE_LOCATION_REQUEST_CODE = 9999;
 	public static final int PAIRING_REQUEST_CODE = 1919;
 	public static final int JOIN_REQUEST_CODE = 2525;
+	public static final int LOGIN_REQUEST_CODE = 893;
 	/** ユーザーのToken */
 	private String mToken;
 
@@ -46,6 +50,13 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 		setContentView(R.layout.activity_main);
 		ButterKnife.bind(this);
 
+
+		//Hawk起動
+		Hawk.init(this.getApplicationContext()).build();
+		//token取得
+		getToken();
+
+		//TODO GroupListの取得で部活動を追加する
 		ArrayList<Clubmonitor> personList = new ArrayList<Clubmonitor>();
 		personList.add(new Clubmonitor("野球部", 41.2f, TemperatureStatus.Emergency));
 		personList.add(new Clubmonitor("サッカー部", 27.4f, TemperatureStatus.Safe));
@@ -66,11 +77,16 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 			}
 		});
 
-		//tokenを取得しておく
-		mToken = this.getIntent().getStringExtra("token");
-
 		//BLEの諸々とした確認
 		checkBLE();
+	}
+
+	private void getToken() {
+		mToken = Hawk.get("token", null);
+		if(mToken == null){
+			Intent loginIntent = new Intent(getApplication(), LoginActivity.class);
+			startActivityForResult(loginIntent, LOGIN_REQUEST_CODE);
+		}
 	}
 
 	@Override
@@ -131,6 +147,10 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 					//TODO ちゃんとclubを追加する
 				}
 				break;
+			case LOGIN_REQUEST_CODE:
+				if(resultcode == RESULT_OK){
+					mToken = data.getStringExtra("token");
+				}
 		}
 	}
 
