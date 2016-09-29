@@ -38,7 +38,7 @@ public class CheckboxListAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent){
+    public View getView(final int position, View convertView, ViewGroup parent){
         convertView=layoutInflater.inflate(R.layout.checkbox_listview_cell,parent,false);
         TextView serialView = (TextView)convertView.findViewById(R.id.serialTextView);
         serialView.setText(checkBoxItemsList.get(position).getSerial());
@@ -46,8 +46,8 @@ public class CheckboxListAdapter extends BaseAdapter {
         checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
-                if(isChecked){buttonView.setChecked(true);}
-                else{buttonView.setChecked(false);}
+                buttonView.setChecked(!buttonView.isChecked());
+                checkBoxItemsList.get(position).setChecked(buttonView.isChecked());
         }
         });
 
