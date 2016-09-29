@@ -27,7 +27,7 @@ import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import com.orhanobut.hawk;
+import com.orhanobut.hawk.Hawk;
 
 public class MainActivity extends AppCompatActivity implements  ServiceConnection{
 
