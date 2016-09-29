@@ -150,6 +150,8 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 			case LOGIN_REQUEST_CODE:
 				if(resultcode == RESULT_OK){
 					mToken = data.getStringExtra("token");
+				}else{
+					finish();
 				}
 		}
 	}
