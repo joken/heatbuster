@@ -24,6 +24,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/addpairbutton"
         android:text="接続"
-        android:layout_gravity="right" />
+        android:layout_gravity="center_horizontal"
+        app:bootstrapBrand="success"/>
 
 </LinearLayout>
