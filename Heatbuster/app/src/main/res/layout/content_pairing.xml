@@ -20,10 +20,13 @@
         android:layout_weight="1"/>
 
     <com.beardedhen.androidbootstrap.BootstrapButton
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/addpairbutton"
-        android:text="接続"
-        android:layout_gravity="right" />
+        android:text="@string/pairing_confirm"
+        android:layout_gravity="right"
+        app:roundedCorners="true"
+        app:bootstrapBrand="primary"
+        app:bootstrapSize="lg" />
 
 </LinearLayout>
