@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -20,6 +21,9 @@ import android.widget.TextView;
 
 import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.orhanobut.hawk.Hawk;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -182,7 +186,7 @@ public class LoginActivity extends Activity {
 		private String token;
 
 		//TODO LoginAPIの決定
-		private static final String loginApi = "http://mofutech:4545/login";
+		private static final String loginApi = "http://mofutech:4545";
 
 		UserLoginTask(String ID, String password) {
 			mID = ID;
@@ -192,18 +196,20 @@ public class LoginActivity extends Activity {
 
 		@Override
 		protected Boolean doInBackground(Void... params) {
-			String query = loginApi + mID + mPassword;
+			String query = loginApi+"/login"+"?username"+mID+"&password={"+md5(mPassword)+"}";
+			String result=null;
 			Request request = new Request.Builder().url(query).build();
-			Response response;
-			String result = null;
-
 			try {
-				response = mclient.newCall(request).execute();
-				result = response.body().string();
-			} catch (Exception e) {
+				Response response = mclient.newCall(request).execute();
+				result =response.body().string();
+				//Log.d("RESULT",result);
+			}catch (Exception e) {
 				e.printStackTrace();
+				result = null;
 				return false;
 			}
+
+
 
 			return parseResult(result);
 		}
@@ -245,5 +251,23 @@ public class LoginActivity extends Activity {
 			return true;
 		}
 	}
-}
 
+	public String md5(String s) {
+		try {
+			// Create MD5 Hash
+			MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
+			digest.update(s.getBytes());
+			byte messageDigest[] = digest.digest();
+
+			// Create Hex String
+			StringBuffer hexString = new StringBuffer();
+			for (int i=0; i<messageDigest.length; i++)
+				hexString.append(String.format("%02x", messageDigest[i] & 0xff));
+			return hexString.toString();
+
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		return "";
+	}
+}

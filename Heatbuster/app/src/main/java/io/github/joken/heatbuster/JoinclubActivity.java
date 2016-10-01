@@ -1,6 +1,7 @@
 package io.github.joken.heatbuster;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -8,11 +9,16 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.orhanobut.hawk.Hawk;
+
 import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class JoinclubActivity extends AppCompatActivity {
 
@@ -57,4 +63,27 @@ public class JoinclubActivity extends AppCompatActivity {
         setResult(RESULT_OK,intent);
         finish();
     }
+
+    //class GetClubList extends AsyncTask<Void,Void,String>{
+    //    OkHttpClient client = new OkHttpClient();
+    //private static final String loginApi = "http://mofutech:4545";
+    //    @Override
+    //    protected String doInBackground(Void... params) {
+    //       String result=null;
+    //        String query = loginApi+"/group/list?token={"+Hawk.get("token")+"}";
+    //        Request request = new Request.Builder()
+    //                .url(query)
+    //                .get()
+    //                .build();
+//
+    //        try {
+    //            Response response = client.newCall(request).execute();
+    //            result = response.body().string();
+    //        }catch (Exception e){
+    //            e.printStackTrace();
+    //        }
+    //        return result;
+    //    }
+    //}
 }
+
