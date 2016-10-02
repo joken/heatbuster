@@ -2,17 +2,22 @@ package io.github.joken.heatbuster;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.preference.Preference;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.support.annotation.NonNull;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ContextMenu;
 import android.view.KeyEvent;
@@ -33,16 +38,23 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 
 	@BindView(R.id.clublistView)
 	ListView clublistView;
+	@BindView(R.id.mainactivity_layout_parent)
+	CoordinatorLayout mainAcitivity_View_Parent;
 
 	/** 部活動リスト */
 	private ClubmonitorAdapter clubAdapter;
 	/** 権限チェックまたはStartActivityForResult使用後にリクエストが自分のものであったか確認する定数(一意であればOK) */
-	private static final int BLE_LOCATION_REQUEST_CODE = 9999;
-	public static final int PAIRING_REQUEST_CODE = 1919;
-	public static final int JOIN_REQUEST_CODE = 2525;
-	public static final int LOGIN_REQUEST_CODE = 893;
+	private static final int BLE_LOCATION_REQUEST_CODE = 9999;//位置情報権限リクエストID
+	public static final int PAIRING_REQUEST_CODE = 1919;//BT端末追加ActivityへのリクエストID
+	public static final int JOIN_REQUEST_CODE = 2525;//部活動追加ActivityへのリクエストID
+	public static final int LOGIN_REQUEST_CODE = 893;//LoginリクエストID
+	public static final int BLUETOOTH_ENABLE_REQUEST_CODE = 4949;//BT有効化のリクエストID
 	/** ユーザーのToken */
 	private String mToken;
+	/** コンテキストメニュー生成時に選択された部活動のIndex */
+	private int currentClub;
+	/** BLEServiceとの通信時に使用 */
+	private Messenger mMessenger;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -50,23 +62,14 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 		setContentView(R.layout.activity_main);
 		ButterKnife.bind(this);
 
-
+		startBLEService();
 		//Hawk起動
 		Hawk.init(this.getApplicationContext()).build();
 		//token取得
 		getToken();
 
-		//TODO GroupListの取得で部活動を追加する
-		ArrayList<Clubmonitor> personList = new ArrayList<Clubmonitor>();
-		personList.add(new Clubmonitor("野球部", 41.2f, TemperatureStatus.Emergency));
-		personList.add(new Clubmonitor("サッカー部", 27.4f, TemperatureStatus.Safe));
-		personList.add(new Clubmonitor("テニス部", 26.7f, TemperatureStatus.Safe));
-		personList.add(new Clubmonitor("女子バレー部", 28.9f, TemperatureStatus.Warning));
-		personList.add(new Clubmonitor("卓球部", 27.2f, TemperatureStatus.Safe));
-		clubAdapter = new ClubmonitorAdapter(MainActivity.this, personList);
-
-		clublistView.setAdapter(clubAdapter);
-		registerForContextMenu(clublistView);
+		//部活動リストを初期化
+		initClubListView();
 
 		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 		fab.setOnClickListener(new View.OnClickListener() {
@@ -81,11 +84,27 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 		checkBLE();
 	}
 
+	private void initClubListView() {
+		//TODO GroupListの取得で部活動を追加する
+		ArrayList<Clubmonitor> personList = new ArrayList<>();
+		personList.add(new Clubmonitor("野球部", 41.2f, TemperatureStatus.Emergency));
+		personList.add(new Clubmonitor("サッカー部", 27.4f, TemperatureStatus.Safe));
+		personList.add(new Clubmonitor("テニス部", 26.7f, TemperatureStatus.Safe));
+		personList.add(new Clubmonitor("女子バレー部", 28.9f, TemperatureStatus.Warning));
+		personList.add(new Clubmonitor("卓球部", 27.2f, TemperatureStatus.Safe));
+		clubAdapter = new ClubmonitorAdapter(MainActivity.this, personList);
+
+		clublistView.setAdapter(clubAdapter);
+		registerForContextMenu(clublistView);
+	}
+
 	private void getToken() {
 		mToken = Hawk.get("token", null);
 		if(mToken == null){
 			Intent loginIntent = new Intent(getApplication(), LoginActivity.class);
 			startActivityForResult(loginIntent, LOGIN_REQUEST_CODE);
+		}else{
+			bindBLEService();
 		}
 	}
 
@@ -94,6 +113,9 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 		super.onCreateContextMenu(menu, v, menuInfo);
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.listview1_context, menu);
+		//クリックインデックス取得
+		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
+		this.currentClub = info.position;
 	}
 
 	@Override
@@ -138,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 			case PAIRING_REQUEST_CODE:
 				if(resultcode == RESULT_OK){
 					ArrayList<CheckBoxItem> pairList = (ArrayList<CheckBoxItem>) data.getSerializableExtra("pairlist");
-					sendPairList(pairList);
+					sendPairList(pairList, currentClub);
 				}
 				break;
 			case JOIN_REQUEST_CODE:
@@ -150,8 +172,14 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 			case LOGIN_REQUEST_CODE:
 				if(resultcode == RESULT_OK){
 					mToken = data.getStringExtra("token");
+					sendToken(mToken);
 				}else{
 					finish();
+				}
+				break;
+			case BLUETOOTH_ENABLE_REQUEST_CODE:
+				if(resultcode != RESULT_OK){
+					Snackbar.make(mainAcitivity_View_Parent, "BlueToothサービスが無効です。", Snackbar.LENGTH_SHORT).show();
 				}
 		}
 	}
@@ -167,10 +195,14 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 		checkPermission();
 	}
 
-	private void startBLEservice(){
+	private void bindBLEService() {
+		Intent it = new Intent(MainActivity.this, BLEService.class);
+		bindService(it, this, 0);
+	}
+
+	private void startBLEService(){
 		//tokenを元にBLEServiceを呼び起こす
 		Intent it = new Intent(MainActivity.this, BLEService.class);
-		it.putExtra("token", mToken);
 		startService(it);
 	}
 
@@ -192,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 			//リクエストが通ったかどうか
 			if(grantResults.length>0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
 				showToast("アクセス権限の許可が受諾されました。");
-				startBLEservice();
+				bindBLEService();
 			}else{
 				showToast("アクセス権限の許可が拒否されました。");
 			}
@@ -208,16 +240,50 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 	/**BLEServiceとのConnectionをとる*/
 	@Override
 	public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-
+		mMessenger = new Messenger(iBinder);
 	}
 
 	@Override
 	public void onServiceDisconnected(ComponentName componentName) {
-
+		mMessenger = null;
 	}
 
-	public void sendPairList(ArrayList<CheckBoxItem> list) {
-		//TODO リストをServiceに放り投げる
+	public void sendToken(String token){
+		Message msg = Message.obtain(null, BLEService.TOKEN_ADD, token);
+		sendMessage(msg);
+	}
+
+	public void sendPairList(ArrayList<CheckBoxItem> list, int clubindex) {
+		//データ作成
+		Bundle bundle = new Bundle();
+		bundle.putSerializable(BLEService.BLE_DEVICE, list);
+		bundle.putInt(BLEService.CLUB_INDEX ,clubindex);
+		Message msg = Message.obtain(null, BLEService.BLE_ADD_DEVICE);
+		msg.setData(bundle);//メッセージ化
+		sendMessage(msg);
+	}
+
+	private void sendMessage(Message msg) {
+		try {
+			mMessenger.send(msg);//送信
+		} catch (RemoteException e) {
+			e.printStackTrace();
+			Toast.makeText(this.getApplicationContext(), "子機が正常に追加できませんでした。", Toast.LENGTH_SHORT).show();
+		}
+	}
+
+	/** BLEServiceからの情報を受信する */
+	class BLEBroadCastReceiver extends BroadcastReceiver{
+
+		@Override
+		public void onReceive(Context context, Intent intent){
+			//Bluetooth有効化の要請のとき
+			if(intent.getAction().equals(BLEService.REQUEST_BLUETOOTH_ACTION)){
+				Intent it = intent.getParcelableExtra(BLEService.REQUEST_BLUETOOTH);
+				startActivityForResult(it, BLUETOOTH_ENABLE_REQUEST_CODE);
+			}
+		}
+
 	}
 
 }
