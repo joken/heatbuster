@@ -185,8 +185,7 @@ public class LoginActivity extends Activity {
 		private final OkHttpClient mclient;
 		private String token;
 
-		//TODO LoginAPIの決定
-		private static final String loginApi = "http://mofutech:4545";
+		private static final String loginApi = "http://mofutech:4545/login";
 
 		UserLoginTask(String ID, String password) {
 			mID = ID;
@@ -196,7 +195,7 @@ public class LoginActivity extends Activity {
 
 		@Override
 		protected Boolean doInBackground(Void... params) {
-			String query = loginApi+"/login"+"?username"+mID+"&password={"+md5(mPassword)+"}";
+			String query = loginApi+"?username"+mID+"&password={"+md5(mPassword)+"}";
 			String result=null;
 			Request request = new Request.Builder().url(query).build();
 			try {
