@@ -1,6 +1,9 @@
 package io.github.joken.heatbuster;
 
-public class Clubmonitor {
+import java.io.Serializable;
+import java.util.ArrayList;
+
+public class Clubmonitor implements Serializable{
     //部活名
     private String clubname;
     //部活に所属している人の平均温度
@@ -9,6 +12,8 @@ public class Clubmonitor {
     private float tempIncreaseRate;
     //状態
     private TemperatureStatus selfStatus;
+    //接続デバイスリスト
+    private ArrayList<CheckBoxItem> deviceList;
 
     public Clubmonitor(String clubname, float clubTemp, TemperatureStatus selfStatus){
         this.clubname = clubname;
@@ -26,6 +31,10 @@ public class Clubmonitor {
 
     public String getTempIncreaseRate() { return "体温上昇率:" + String.valueOf(this.tempIncreaseRate)+"%";}
 
+    public void setSelfStatus(TemperatureStatus stat){this.selfStatus = stat;}
     public TemperatureStatus getSelfStatus() {return selfStatus;}
+
+    public void setDeviceList(ArrayList<CheckBoxItem> list){this.deviceList = list;}
+    public ArrayList<CheckBoxItem> getDeviceList(){return this.deviceList;}
 
 }
