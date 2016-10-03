@@ -3,7 +3,8 @@
 
 
 int main(void) {
-
+    
+  power = 0;
   //Device initializing
   Ticker Ticker;
   Ticker.attach(PeriodicCallBack, WAIT_TIME);

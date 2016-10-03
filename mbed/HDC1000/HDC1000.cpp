@@ -1,4 +1,3 @@
-#include "mbed.h"
 #include "HDC1000.h"
 
 

@@ -13,13 +13,14 @@ Serial pc(USBTX, USBRX);
 
 #endif
 
-#define WAIT_TIME 1
-#define WARNING_HEAT_LEVEL 33.0
+#define WAIT_TIME 10
+#define WARNING_HEAT_LEVEL 35.0
 #define DEVICE_NAME "afjio3"
 
 
 void DataWrittenCallback(const GattWriteCallbackParams *params);
 void DisconnectionCallBack(const Gap::DisconnectionCallbackParams_t *parameters);
+void FlashingEmergency();
 void onConnectionCallBack(const Gap::ConnectionCallbackParams_t *parameters);
 void PeriodicCallBack(void);
 void UpdateEmergenceState(float temperature);
@@ -29,9 +30,10 @@ float AmountOfWaterVapor(float temperature, float humidity);
 
 
 BLEDevice ble;
-HDC1000 health_value(I2C_SDA0, I2C_SCL0);
-HDC1000 normal_value(I2C_SDA1, I2C_SCL1);
-DigitalOut emergency(LED1);
+HDC1000 health_value(P0_23, P0_24);
+HDC1000 normal_value(P0_25, P0_28);
+DigitalOut emergency(P0_14);
+DigitalOut power(P0_13);
 
 /*
   flag[] is boolean variables for notify some states.
