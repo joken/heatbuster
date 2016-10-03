@@ -14,7 +14,10 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class BLEService extends Service {
 	/** Key-Value方式のKeyあるいはRequest ID */
@@ -71,7 +74,16 @@ public class BLEService extends Service {
 			@Override
 			public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
 				if(status == BluetoothGatt.GATT_SUCCESS){
+					CheckBoxItem bleDeveice = new CheckBoxItem(gatt.getDevice().getName());
 					byte[] raw_data = characteristic.getValue();
+					byte[] templebyte0 = Arrays.copyOfRange(raw_data,1,3);
+					byte[] templebyte1 = Arrays.copyOfRange(raw_data,4,5);
+					byte[] templebyte = new byte[templebyte0.length+templebyte1.length];
+					System.arraycopy(templebyte0,0,templebyte,0,templebyte0.length);
+					System.arraycopy(templebyte1,0,templebyte,templebyte0.length,templebyte1.length);
+					bleDeveice.setTemple(ByteBuffer.wrap(templebyte).order(ByteOrder.LITTLE_ENDIAN).getFloat());
+					bleDeveice.setHumid(ByteBuffer.wrap(Arrays.copyOfRange(raw_data,6,10)).order(ByteOrder.LITTLE_ENDIAN).getFloat());
+					bleDeveice.setEmer_flag((ByteBuffer.wrap(Arrays.copyOfRange(raw_data,3,4)).getInt() != 0));
 					//TODO パースして結果をなにかに格納する
 				}
 			}

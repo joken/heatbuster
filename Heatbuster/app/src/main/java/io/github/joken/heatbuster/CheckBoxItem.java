@@ -11,6 +11,12 @@ public class CheckBoxItem implements Serializable{
     private BluetoothDevice device;
     //checkされていたらtrue,されていなかったらfalse
     private boolean checked;
+    //温度
+    private float temple=0.0f;
+    //湿度
+    private float humid=0.0f;
+    //emergency_flag
+    private boolean emer_flag=false;
 
     public CheckBoxItem(String serial)
     {
@@ -35,4 +41,10 @@ public class CheckBoxItem implements Serializable{
     {
         this.checked = checked;
     }
+    public float getTemple(){return this.temple;};
+    public void setTemple(float temple){this.temple=temple;}
+    public float getHumid(){return  this.humid;}
+    public void setHumid(float humid){this.humid=humid;}
+    public boolean getEmer_flag(){return this.emer_flag;}
+    public void setEmer_flag(boolean flag){this.emer_flag=flag;}
 }
