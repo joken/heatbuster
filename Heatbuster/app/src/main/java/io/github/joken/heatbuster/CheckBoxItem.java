@@ -10,13 +10,15 @@ public class CheckBoxItem implements Serializable{
     //BluetoothDeviceの実体参照
     private BluetoothDevice device;
     //checkされていたらtrue,されていなかったらfalse
-    private boolean checked;
+    private Boolean checked;
     //温度
-    private float temple=0.0f;
+    private Float temple=0.0f;
     //湿度
-    private float humid=0.0f;
+    private Float humid=0.0f;
     //emergency_flag
-    private boolean emer_flag=false;
+    private Boolean emer_flag=false;
+    //status
+    private TemperatureStatus stat=TemperatureStatus.Safe;
 
     public CheckBoxItem(String serial)
     {
@@ -47,4 +49,17 @@ public class CheckBoxItem implements Serializable{
     public void setHumid(float humid){this.humid=humid;}
     public boolean getEmer_flag(){return this.emer_flag;}
     public void setEmer_flag(boolean flag){this.emer_flag=flag;}
+    public String getStat(){
+        if (this.emer_flag){
+            return "EMER";
+        }
+        this.stat = TemperatureStatus.getStatusbyTemp(this.getTemple());
+        switch (stat){
+            case Warning:
+                return "WARN";
+            case Safe:
+                return "SAFE";
+        }
+        return "SAFE";
+    }
 }

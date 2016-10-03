@@ -23,7 +23,7 @@ public enum TemperatureStatus {
 		this.brand = br;
 	}
 
-	public static TemperatureStatus getStatusbyTemp(int temp){
+	public static TemperatureStatus getStatusbyTemp(float temp){
 		if(temp <= Safe_Limen){
 			return Safe;
 		}else{

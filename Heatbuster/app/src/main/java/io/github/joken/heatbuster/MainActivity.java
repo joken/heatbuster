@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -28,11 +29,21 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
 import com.orhanobut.hawk.Hawk;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity implements  ServiceConnection{
 
@@ -284,6 +295,66 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 			}
 		}
 
+	}
+
+	class UploadClubJSON extends AsyncTask<Void, Void, Boolean> {
+		public final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+		OkHttpClient client = new OkHttpClient();
+		private String gid;
+		private String json;
+
+		UploadClubJSON(String gid,String json){
+			this.gid=gid;
+			this.json=json;
+		}
+
+		String post(String url) throws IOException{
+			RequestBody body = RequestBody.create(JSON,json);
+			Request request = new Request.Builder()
+					.url(url)
+					.post(body)
+					.build();
+			Response response = client.newCall(request).execute();
+			return response.body().string();
+		}
+
+		@Override
+		protected Boolean doInBackground(Void... params) {
+			String query = "http://mofutech:4545/group/"+gid+"/mod/update";
+			try{
+				post(query);
+				return true;
+			}catch (Exception e){
+				e.printStackTrace();
+				return false;
+			}
+		}
+	}
+
+	public String MakingJson(ArrayList<CheckBoxItem> conDeviceList){
+		// jsonデータの作成
+		JSONObject jsonOneData;
+
+		try {
+			jsonOneData = new JSONObject();
+			jsonOneData.put("token", Hawk.get("token"));
+
+			JSONArray itemArray = new JSONArray();
+			for (CheckBoxItem conDevice : conDeviceList) {
+				jsonOneData = new JSONObject();
+				jsonOneData.put("mac", conDevice.getSerial());
+				jsonOneData.put("temp", conDevice.getTemple());
+				jsonOneData.put("wet", conDevice.getHumid());
+				jsonOneData.put("stat", conDevice.getStat());
+				itemArray.put(jsonOneData);
+			}
+			jsonOneData.put("elements",itemArray);
+
+		}catch (Exception e){
+			e.printStackTrace();
+			return "";
+		}
+		return jsonOneData.toString();
 	}
 
 }
