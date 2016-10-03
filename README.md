@@ -15,7 +15,7 @@ Heatbuster/mbed
 ## main.cpp概要
 ### define
 WAIT_TIME: 情報更新間隔(秒)   
-WARNING_HEAT_LEVEL:emergencyとする体温(°C)　　　
+WARNING_HEAT_LEVEL:emergencyとする体温(°C)   
 DEVICE_NAME:半角英数6文字までの任意値   
    
 ### 関数定義
