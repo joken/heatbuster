@@ -28,8 +28,10 @@ public class Clubmonitor implements Serializable{
     public String getClubTemp(){
         return "平均深層体温:"+ String.valueOf(this.clubTemp)+"℃";
     }
+    public void setClubTemp(float temp){this.clubTemp=temp;}
 
-    public String getTempIncreaseRate() { return "体温上昇率:" + String.valueOf(this.tempIncreaseRate)+"%";}
+    public String getTempIncreaseRate() { return "湿度:" + String.valueOf(this.tempIncreaseRate)+"%";}
+    public void setTempIncreaseRate(float humid){this.tempIncreaseRate=humid;}
 
     public void setSelfStatus(TemperatureStatus stat){this.selfStatus = stat;}
     public TemperatureStatus getSelfStatus() {return selfStatus;}

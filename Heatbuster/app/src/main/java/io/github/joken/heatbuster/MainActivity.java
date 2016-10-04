@@ -357,4 +357,60 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 		return jsonOneData.toString();
 	}
 
+	class DownloadClubStats extends AsyncTask<Void, Void, Boolean> {
+		OkHttpClient client = new OkHttpClient();
+
+		private String gid;
+
+		DownloadClubStats(String gid){
+			this.gid=gid;
+		}
+
+		String run(String url) throws IOException {
+			Request request = new Request.Builder()
+					.url(url)
+					.build();
+
+			Response response = client.newCall(request).execute();
+			return response.body().string();
+		}
+
+		@Override
+		protected Boolean doInBackground(Void... params) {
+			String query = "http://mofutech:4545/group/"+gid+"/mod/status";
+			try{
+				run(query);
+				return true;
+			}catch (Exception e){
+				e.printStackTrace();
+				return false;
+			}
+		}
+	}
+
+	public void downparce(Clubmonitor club,String jsondata){
+		try {
+			JSONObject item = new JSONObject(jsondata);
+			if (item.getString("success") == "true"){
+				JSONObject item2 = item.getJSONObject("result");
+				club.setClubTemp(Float.valueOf(item2.getString("temp")));
+				club.setTempIncreaseRate(Float.valueOf(item2.getString("wet")));
+				switch (item2.getString("stat")){
+					case "EMER":
+						club.setSelfStatus(TemperatureStatus.Emergency);
+						//TODO: 警告のアクティビティを表示する。
+						break;
+					case "WARN":
+						club.setSelfStatus(TemperatureStatus.Warning);
+						break;
+					case "SAFE":
+						club.setSelfStatus(TemperatureStatus.Safe);
+						break;
+				}
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+	}
+
 }
