@@ -1,7 +1,14 @@
 package io.github.joken.heatbuster;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,20 +33,28 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class JoinclubActivity extends AppCompatActivity {
+public class JoinclubActivity extends AppCompatActivity implements ServiceConnection{
 
     @BindView(R.id.joinclub)
     ListView joinView;
 
     private CheckboxListAdapter checkAdaper;
+    private Messenger mMessenger,replyMessenger;
+    private ArrayList<Clubmonitor> BLEService_ClubMonitor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_joinclub);
         ButterKnife.bind(this);
 
+        //BLEServiceと接続
+        Intent intent = new Intent(JoinclubActivity.this, BLEService.class);
+        bindService(intent, this, 0);
+        sendClubListRequest();
+
         getClubList getClubListAsync = new getClubList();
-        getClubList.execute(null);
+        getClubListAsync.execute();
 
         //リスト項目をクリック時に呼び出されるコールバックを登録
         joinView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -64,12 +79,45 @@ public class JoinclubActivity extends AppCompatActivity {
         finish();
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
+    public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+        mMessenger = new Messenger(iBinder);
+        replyMessenger = new Messenger(new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                BLEService_ClubMonitor = (ArrayList<Clubmonitor>)msg.obj;
+            }
+        });
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName componentName) {
+        mMessenger = null;
+    }
+
+    private void sendClubListRequest(){
+        Message message = Message.obtain(null, BLEService.CLUBLIST_REQUEST);
+        message.replyTo = replyMessenger;
+        sendMessage(message);
+    }
+
+    private void sendMessage(Message msg){
+        try{
+            mMessenger.send(msg);
+        }catch (RemoteException e){
+            e.printStackTrace();
+        }
+    }
+
     class getClubList extends AsyncTask<Void, Void, Boolean> {
-        OkHttpClient client = new OkHttpClient();
-        ArrayList<Clubmonitor> joinableclublist = new ArrayList<>();
+        OkHttpClient client;
+        ArrayList<Clubmonitor> joinableclublist;
 
         public getClubList(){
             super();
+            client = new OkHttpClient();
+            joinableclublist = new ArrayList<>();
         }
 
         void run(String url) throws IOException {
@@ -97,7 +145,7 @@ public class JoinclubActivity extends AppCompatActivity {
         protected void onPostExecute(final Boolean success){
             ArrayList<CheckBoxItem> joinclubList = new ArrayList<CheckBoxItem>();
             for (Clubmonitor club: joinableclublist){
-                if (!(Arrays.asList(clublist).contains("club"))){
+                if (!(Arrays.asList(BLEService_ClubMonitor).contains("club"))){
                     //TODO:この上部分のclublistをなんとかしてBLEServiceからとってくる。
                     joinclubList.add(new CheckBoxItem(club.getName()));
                 }

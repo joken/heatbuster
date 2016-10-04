@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.RemoteException;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -27,6 +28,7 @@ public class BLEService extends Service {
 	public static final String CLUB_INDEX = "club_index";//BT端末追加時の部活動指定キー
 	public static final int BLE_ADD_DEVICE = 931;//BT端末追加のMessageID
 	public static final int TOKEN_ADD = 514114;//Token追加のMessageID
+	public static final int CLUBLIST_REQUEST = 45454545;//clubListを要求されたときのID
 
 	private Messenger mMessenger;//メッセンジャー
 	private static String token;//LoginToken
@@ -122,6 +124,15 @@ public class BLEService extends Service {
 				case TOKEN_ADD:
 					token = (String)msg.obj;
 					break;
+				case CLUBLIST_REQUEST:
+					Messenger reply = msg.replyTo;
+					if(reply != null){
+						try{
+							reply.send(Message.obtain(null, 0, clubList));
+						}catch(RemoteException e){
+							e.printStackTrace();
+						}
+					}
 			}
 		}
 
