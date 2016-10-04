@@ -56,17 +56,9 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
         getClubList getClubListAsync = new getClubList();
         getClubListAsync.execute();
 
-        //リスト項目をクリック時に呼び出されるコールバックを登録
-        joinView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            //リスト項目クリック時の処理
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                finish();
-            }
-        });
     }
 
+    /** 参加の確定ボタン */
     @OnClick(R.id.addjoinbutton)
     public void onClick(){
         final ArrayList<CheckBoxItem> checked = new ArrayList<>();
