@@ -398,7 +398,9 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 				switch (item2.getString("stat")){
 					case "EMER":
 						club.setSelfStatus(TemperatureStatus.Emergency);
-						//TODO: 警告のアクティビティを表示する。
+						Intent i = new Intent(getApplicationContext(),WorningActivity.class);
+						i.putExtra("CLUBNAME",club.getName());
+						startActivity(i);
 						break;
 					case "WARN":
 						club.setSelfStatus(TemperatureStatus.Warning);
