@@ -98,6 +98,7 @@ public class JoinclubActivity extends AppCompatActivity {
             ArrayList<CheckBoxItem> joinclubList = new ArrayList<CheckBoxItem>();
             for (Clubmonitor club: joinableclublist){
                 if (!(Arrays.asList(clublist).contains("club"))){
+                    //TODO:この上部分のclublistをなんとかしてBLEServiceからとってくる。
                     joinclubList.add(new CheckBoxItem(club.getName()));
                 }
             }

@@ -99,11 +99,11 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 	private void initClubListView() {
 		//TODO GroupListの取得で部活動を追加する
 		ArrayList<Clubmonitor> personList = new ArrayList<>();
-		personList.add(new Clubmonitor("野球部", 41.2f, TemperatureStatus.Emergency));
-		personList.add(new Clubmonitor("サッカー部", 27.4f, TemperatureStatus.Safe));
-		personList.add(new Clubmonitor("テニス部", 26.7f, TemperatureStatus.Safe));
-		personList.add(new Clubmonitor("女子バレー部", 28.9f, TemperatureStatus.Warning));
-		personList.add(new Clubmonitor("卓球部", 27.2f, TemperatureStatus.Safe));
+		personList.add(new Clubmonitor("1","野球部", 41.2f, TemperatureStatus.Emergency));
+		personList.add(new Clubmonitor("2","サッカー部", 27.4f, TemperatureStatus.Safe));
+		personList.add(new Clubmonitor("3","テニス部", 26.7f, TemperatureStatus.Safe));
+		personList.add(new Clubmonitor("4","女子バレー部", 28.9f, TemperatureStatus.Warning));
+		personList.add(new Clubmonitor("5","卓球部", 27.2f, TemperatureStatus.Safe));
 		clubAdapter = new ClubmonitorAdapter(MainActivity.this, personList);
 
 		clublistView.setAdapter(clubAdapter);
@@ -298,6 +298,7 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 
 	}
 
+	/** Serverに指定された部活の端末データを全て送信する **/
 	class UploadClubJSON extends AsyncTask<Void, Void, Boolean> {
 		public final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 		OkHttpClient client = new OkHttpClient();
@@ -332,6 +333,7 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 		}
 	}
 
+	/** 送信用のJSONを作成する **/
 	public String MakingJson(ArrayList<CheckBoxItem> conDeviceList){
 		// jsonデータの作成
 		JSONObject jsonOneData;
@@ -358,13 +360,16 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 		return jsonOneData.toString();
 	}
 
+	/**Serverからクラブごとの平均値と部内温度最高評価を受信する**/
 	class DownloadClubStats extends AsyncTask<Void, Void, Boolean> {
 		OkHttpClient client = new OkHttpClient();
 
 		private String gid;
+		private Clubmonitor club;
 
-		DownloadClubStats(String gid){
+		DownloadClubStats(String gid,Clubmonitor club){
 			this.gid=gid;
+			this.club=club;
 		}
 
 		String run(String url) throws IOException {
@@ -380,7 +385,7 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 		protected Boolean doInBackground(Void... params) {
 			String query = "http://mofutech:4545/group/"+gid+"/mod/status";
 			try{
-				run(query);
+				downparce(club,run(query));
 				return true;
 			}catch (Exception e){
 				e.printStackTrace();
@@ -389,6 +394,7 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 		}
 	}
 
+	/** serverから受信したJSONの解析及びオブジェクト(部活)の更新 **/
 	public void downparce(Clubmonitor club,String jsondata){
 		try {
 			JSONObject item = new JSONObject(jsondata);
