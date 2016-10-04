@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 public class Clubmonitor implements Serializable{
+    //GID
+    private String gid;
     //部活名
     private String clubname;
     //部活に所属している人の平均温度
@@ -15,11 +17,15 @@ public class Clubmonitor implements Serializable{
     //接続デバイスリスト
     private ArrayList<CheckBoxItem> deviceList;
 
-    public Clubmonitor(String clubname, float clubTemp, TemperatureStatus selfStatus){
+    public Clubmonitor(String gid,String clubname, float clubTemp, TemperatureStatus selfStatus){
+        this.gid=gid;
         this.clubname = clubname;
         this.clubTemp = clubTemp;
         this.selfStatus = selfStatus;
     }
+
+    public String getGid(){return this.gid;}
+    public void setGid(String gid){this.gid = gid;}
 
     public String getName(){
         return this.clubname;
