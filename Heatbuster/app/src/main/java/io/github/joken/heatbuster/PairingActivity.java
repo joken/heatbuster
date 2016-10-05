@@ -1,7 +1,13 @@
 package io.github.joken.heatbuster;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.ParcelUuid;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.ListView;
@@ -20,6 +26,8 @@ public class PairingActivity extends AppCompatActivity {
 
 	/** 発見されたBLEデバイス名を格納する */
 	private CheckboxListAdapter checkAdaper;
+	private BluetoothAdapter mBluetoothAdapter;
+	private BluetoothAdapter.LeScanCallback mLeScanCallBack;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -28,11 +36,6 @@ public class PairingActivity extends AppCompatActivity {
 		ButterKnife.bind(this);
 
         ArrayList<CheckBoxItem> pairbleList = new ArrayList<CheckBoxItem>();
-        pairbleList.add(new CheckBoxItem("k4z9yc"));
-        pairbleList.add(new CheckBoxItem("z8mwf4"));
-        pairbleList.add(new CheckBoxItem("8xsdxg"));
-        pairbleList.add(new CheckBoxItem("zp29gy"));
-        pairbleList.add(new CheckBoxItem("jawfyf"));
         checkAdaper = new CheckboxListAdapter(PairingActivity.this,pairbleList);
 
 		//ListViewにAdapterを登録
@@ -43,10 +46,66 @@ public class PairingActivity extends AppCompatActivity {
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 
+
+		// Initializes Bluetooth adapter.
+		final BluetoothManager bluetoothManager =
+				(BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+		mBluetoothAdapter = bluetoothManager.getAdapter();
+
+		// Ensures Bluetooth is available on the device and it is enabled. If not,
+		// displays a dialog requesting user permission to enable Bluetooth.
+		if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
+			Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+			startActivityForResult(enableBtIntent, MainActivity.BLUETOOTH_ENABLE_REQUEST_CODE);
+		}
+
+		initScanCallBack();
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		mBluetoothAdapter.startLeScan(mLeScanCallBack);
+	}
 
-    @OnClick(R.id.addpairbutton)
+	@Override
+	protected void onPause() {
+		super.onPause();
+		mBluetoothAdapter.startLeScan(mLeScanCallBack);
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode){
+			case MainActivity.BLUETOOTH_ENABLE_REQUEST_CODE:
+				if(resultCode != RESULT_OK){
+					Toast.makeText(this.getApplicationContext(), "Bluetoothの使用が拒否されました。", Toast.LENGTH_SHORT).show();
+					setResult(RESULT_CANCELED);
+					finish();
+				}
+		}
+	}
+
+	private void initScanCallBack(){
+		mLeScanCallBack = new BluetoothAdapter.LeScanCallback() {
+			@Override
+			public void onLeScan(BluetoothDevice bluetoothDevice, int i, byte[] bytes) {
+				ParcelUuid[] uuids = bluetoothDevice.getUuids();
+				StringBuilder builder = new StringBuilder();
+				for(ParcelUuid uuid : uuids){
+					builder.append(uuid.toString());
+				}
+				String parsedUUID = builder.toString();
+				CheckBoxItem item = new CheckBoxItem(parsedUUID);
+				item.setDevice(bluetoothDevice);
+				if(!checkAdaper.checkBoxItemsList.contains(item)){
+					checkAdaper.checkBoxItemsList.add(item);
+				}
+			}
+		};
+	}
+
+	@OnClick(R.id.addpairbutton)
     public void onClick() {
         final ArrayList<CheckBoxItem> checked = new ArrayList<>();
         for(CheckBoxItem item : checkAdaper.checkBoxItemsList){
