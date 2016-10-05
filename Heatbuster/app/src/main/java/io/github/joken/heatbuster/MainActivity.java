@@ -179,6 +179,7 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 				if(resultcode==RESULT_OK){
 					ArrayList<CheckBoxItem> joinList = (ArrayList<CheckBoxItem>) data.getSerializableExtra("joinlist");
 					//TODO ちゃんとclubを追加する
+					sendJoinList(joinList);
 				}
 				break;
 			case LOGIN_REQUEST_CODE:
@@ -272,6 +273,14 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 		bundle.putInt(BLEService.CLUB_INDEX ,clubindex);
 		Message msg = Message.obtain(null, BLEService.BLE_ADD_DEVICE);
 		msg.setData(bundle);//メッセージ化
+		sendMessage(msg);
+	}
+
+	public void sendJoinList(ArrayList<CheckBoxItem> list){
+		Bundle bundle = new Bundle();
+		bundle.putSerializable(BLEService.JOINING_CLUB, list);
+		Message msg = Message.obtain(null, BLEService.JOIN_CLUB);
+		msg.setData(bundle);
 		sendMessage(msg);
 	}
 

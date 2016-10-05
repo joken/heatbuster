@@ -26,9 +26,11 @@ public class BLEService extends Service {
 	public static final String REQUEST_BLUETOOTH_ACTION = "request_bluetooth_action";//BTの有効化リクエストアクションToken
 	public static final String BLE_DEVICE = "connection_devices";//接続対象デバイスリストのキー
 	public static final String CLUB_INDEX = "club_index";//BT端末追加時の部活動指定キー
+	public static final String JOINING_CLUB = "joining_club";//部活動追加時のlistキー
 	public static final int BLE_ADD_DEVICE = 931;//BT端末追加のMessageID
 	public static final int TOKEN_ADD = 514114;//Token追加のMessageID
 	public static final int CLUBLIST_REQUEST = 45454545;//clubListを要求されたときのID
+	public static final int JOIN_CLUB = 993;//部活動追加時のID
 
 	private Messenger mMessenger;//メッセンジャー
 	private static String token;//LoginToken
@@ -133,6 +135,10 @@ public class BLEService extends Service {
 							e.printStackTrace();
 						}
 					}
+					break;
+				case JOIN_CLUB:
+					clubList = (ArrayList<Clubmonitor>)msg.getData().getSerializable(JOINING_CLUB);
+					break;
 			}
 		}
 
