@@ -59,6 +59,12 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
 
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(this);
+    }
+
     /** 参加の確定ボタン */
     @OnClick(R.id.addjoinbutton)
     public void onClick(){

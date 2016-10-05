@@ -45,6 +45,12 @@ public class DeleteClubActivity extends AppCompatActivity implements ServiceConn
         sendClubListRequest();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(this);
+    }
+
     public void registMenu(ArrayList<Clubmonitor> clublist){
         ArrayList<CheckBoxItem> deleteclubList = new ArrayList<CheckBoxItem>();
         for (Clubmonitor club:clublist){

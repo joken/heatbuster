@@ -46,7 +46,7 @@ import com.orhanobut.hawk.Hawk;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public class MainActivity extends AppCompatActivity implements  ServiceConnection{
+public class MainActivity extends AppCompatActivity implements ServiceConnection{
 
 	@BindView(R.id.clublistView)
 	ListView clublistView;
@@ -94,6 +94,12 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 
 		//BLEの諸々とした確認
 		checkBLE();
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		unbindService(this);
 	}
 
 	private void initClubListView() {
