@@ -143,8 +143,8 @@ public class MainActivity extends AppCompatActivity implements  ServiceConnectio
 			case R.id.reverce_all:
 				return true;
 			case R.id.delete:
-				Intent intent1 = new Intent(getApplication(),DeleteClubActivity.class);
-				startActivity(intent1);
+				Intent intent_delete = new Intent(getApplication(),DeleteClubActivity.class);
+				startActivity(intent_delete);
 				return true;
 			default:
 				return super.onContextItemSelected(item);
