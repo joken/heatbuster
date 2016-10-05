@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.ListView;
 
 import com.orhanobut.hawk.Hawk;
@@ -65,6 +66,8 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
         for(CheckBoxItem item : checkAdaper.checkBoxItemsList){
             if(item.getChecked())checked.add(item);
         }
+        joinClubinServer joinmestoserver = new joinClubinServer(checked);
+        joinmestoserver.execute();
         Intent intent = new Intent();
         intent.putExtra("joinlist",checked);
         setResult(RESULT_OK,intent);
@@ -137,9 +140,17 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
         protected void onPostExecute(final Boolean success){
             ArrayList<CheckBoxItem> joinclubList = new ArrayList<CheckBoxItem>();
             for (Clubmonitor club: joinableclublist){
-                if (!(Arrays.asList(BLEService_ClubMonitor).contains("club"))){
-                    //TODO:この上部分のclublistをなんとかしてBLEServiceからとってくる。
-                    joinclubList.add(new CheckBoxItem(club.getName()));
+                Boolean contained = false;
+                for (Clubmonitor BLEclub: BLEService_ClubMonitor){
+                    if (BLEclub.getName().equals(club.getName())){
+                        contained = true;
+                        break;
+                    }
+                }
+                if (!(contained)){
+                    CheckBoxItem joinclub = new CheckBoxItem(club.getName());
+                    joinclub.setGid(club.getGid());
+                    joinclubList.add(joinclub);
                 }
             }
             checkAdaper = new CheckboxListAdapter(JoinclubActivity.this,joinclubList);
@@ -169,6 +180,40 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
             return null;
         }
         return joinableclublist;
+    }
+
+    class joinClubinServer extends AsyncTask<Void, Void, Boolean> {
+        OkHttpClient client;
+        ArrayList<CheckBoxItem> joinclublist;
+
+        public joinClubinServer(ArrayList<CheckBoxItem> joinclublist) {
+            super();
+            client = new OkHttpClient();
+            this.joinclublist = joinclublist;
+        }
+
+        void run(String url) throws IOException {
+            Request request = new Request.Builder()
+                    .url(url)
+                    .build();
+
+            Response response = client.newCall(request).execute();
+            //TODO: 遅れなかった時の処理を書いていません
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            for (CheckBoxItem club : joinclublist) {
+                String query = "http://mofutech:4545/group/" + club.getGid() + "/join?token={" + Hawk.get("token") + "}";
+                try {
+                    run(query);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 }
 

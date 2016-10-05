@@ -46,7 +46,7 @@ public class CheckboxListAdapter extends BaseAdapter {
         checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
-                buttonView.setChecked(!buttonView.isChecked());
+                //buttonView.setChecked(!buttonView.isChecked());
                 checkBoxItemsList.get(position).setChecked(buttonView.isChecked());
         }
         });

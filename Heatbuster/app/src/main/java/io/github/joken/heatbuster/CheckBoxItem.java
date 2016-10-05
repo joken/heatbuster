@@ -7,10 +7,12 @@ import java.io.Serializable;
 public class CheckBoxItem implements Serializable{
     //serialナンバー(今はintに設定しているがどうなるかわからない)
     private String serial="N/A";
+    //joinclub用のgid
+    private String gid="";
     //BluetoothDeviceの実体参照
     private BluetoothDevice device;
     //checkされていたらtrue,されていなかったらfalse
-    private Boolean checked;
+    private Boolean checked=false;
     //温度
     private Float temple=0.0f;
     //湿度
@@ -33,6 +35,8 @@ public class CheckBoxItem implements Serializable{
     {
         this.serial= serial;
     }
+    public String getGid(){return this.gid;}
+    public void setGid(String gid){this.gid=gid;}
     public void setDevice(BluetoothDevice d){this.device = d;}
     public BluetoothDevice getDevice(){return this.device;}
     public boolean getChecked()
