@@ -2,6 +2,7 @@ package io.github.joken.heatbuster;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.support.v7.app.AlertDialog;
 import android.support.v4.app.DialogFragment;
@@ -87,6 +88,9 @@ public class DialogTemplate extends DialogFragment {
 
 		/** Dialog をキャンセル可かどうか. */
 		boolean mCancelable = true;
+
+		/** ProgressDialogとして使用するかどうか. */
+		boolean misProgress = false;
 
 		/**
 		 * コンストラクタ. Activity 上から生成する場合.
@@ -258,6 +262,7 @@ public class DialogTemplate extends DialogFragment {
 			args.putString("positive_label", mPositiveLabel);
 			args.putString("negative_label", mNegativeLabel);
 			args.putBoolean("cancelable", mCancelable);
+			args.putBoolean("isProgress", misProgress);
 			if (mParams != null) {
 				args.putBundle("params", mParams);
 			}
@@ -328,23 +333,34 @@ public class DialogTemplate extends DialogFragment {
 		final String positiveLabel = getArguments().getString("positive_label");
 		final String negativeLabel = getArguments().getString("negative_label");
 		setCancelable(getArguments().getBoolean("cancelable"));
-		final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-		if (!TextUtils.isEmpty(title)) {
-			builder.setTitle(title);
+		if(!getArguments().getBoolean("isProgress")){
+			final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+			if (!TextUtils.isEmpty(title)) {
+				builder.setTitle(title);
+			}
+			if (!TextUtils.isEmpty(message)) {
+				builder.setMessage(message);
+			}
+			if (items != null && items.length > 0) {
+				builder.setItems(items, listener);
+			}
+			if (!TextUtils.isEmpty(positiveLabel)) {
+				builder.setPositiveButton(positiveLabel, listener);
+			}
+			if (!TextUtils.isEmpty(negativeLabel)) {
+				builder.setNegativeButton(negativeLabel, listener);
+			}
+			return builder.create();
+		}else{
+			final ProgressDialog builder = new ProgressDialog(getActivity());
+			if (!TextUtils.isEmpty(title)) {
+				builder.setTitle(title);
+			}
+			if (!TextUtils.isEmpty(message)) {
+				builder.setMessage(message);
+			}
+			return builder;
 		}
-		if (!TextUtils.isEmpty(message)) {
-			builder.setMessage(message);
-		}
-		if (items != null && items.length > 0) {
-			builder.setItems(items, listener);
-		}
-		if (!TextUtils.isEmpty(positiveLabel)) {
-			builder.setPositiveButton(positiveLabel, listener);
-		}
-		if (!TextUtils.isEmpty(negativeLabel)) {
-			builder.setNegativeButton(negativeLabel, listener);
-		}
-		return builder.create();
 	}
 
 	@Override
