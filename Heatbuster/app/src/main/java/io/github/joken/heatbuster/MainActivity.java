@@ -184,7 +184,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 			case JOIN_REQUEST_CODE:
 				if(resultcode==RESULT_OK){
 					ArrayList<CheckBoxItem> joinList = (ArrayList<CheckBoxItem>) data.getSerializableExtra("joinlist");
-					//TODO ちゃんとclubを追加する
 					sendJoinList(joinList);
 				}
 				break;
