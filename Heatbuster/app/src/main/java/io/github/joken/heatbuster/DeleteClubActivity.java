@@ -1,6 +1,14 @@
 package io.github.joken.heatbuster;
 
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ListView;
@@ -16,18 +24,25 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class DeleteClubActivity extends AppCompatActivity {
+public class DeleteClubActivity extends AppCompatActivity implements ServiceConnection{
 
     @BindView(R.id.deleteClub)
     ListView deleteView;
 
     private CheckboxListAdapter checkAdaper;
+    private Messenger mMessenger,replyMessenger;
+    private static ArrayList<Clubmonitor> BLEService_ClubMonitor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_delete_club);
         ButterKnife.bind(this);
+
+        //BLEServiceと接続
+        Intent intent = new Intent(DeleteClubActivity.this, BLEService.class);
+        bindService(intent, this, 0);
+        sendClubListRequest();
     }
 
     public void registMenu(ArrayList<Clubmonitor> clublist){
@@ -40,6 +55,39 @@ public class DeleteClubActivity extends AppCompatActivity {
         checkAdaper = new CheckboxListAdapter(DeleteClubActivity.this,deleteclubList);
         deleteView.setAdapter(checkAdaper);
         registerForContextMenu(deleteView);
+    }
+
+    @Override
+    public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+        mMessenger = new Messenger(iBinder);
+        replyMessenger = new Messenger(new MessageHandler());
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName componentName) {
+        mMessenger = null;
+    }
+
+    private void sendClubListRequest(){
+        Message message = Message.obtain(null, BLEService.CLUBLIST_REQUEST);
+        message.replyTo = replyMessenger;
+        sendMessage(message);
+    }
+
+    private void sendMessage(Message msg){
+        try{
+            mMessenger.send(msg);
+        }catch (RemoteException e){
+            e.printStackTrace();
+        }
+    }
+
+    static class MessageHandler extends Handler {
+        @Override
+        @SuppressWarnings("unchecked")
+        public void handleMessage(Message msg) {
+            BLEService_ClubMonitor = (ArrayList<Clubmonitor>)msg.obj;
+        }
     }
 
     class deleteClubinServer extends AsyncTask<Void, Void, Boolean> {
