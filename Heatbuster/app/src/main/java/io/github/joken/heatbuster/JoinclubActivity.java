@@ -41,7 +41,7 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
 
     private CheckboxListAdapter checkAdaper;
     private Messenger mMessenger,replyMessenger;
-    private ArrayList<Clubmonitor> BLEService_ClubMonitor;
+    private static ArrayList<Clubmonitor> BLEService_ClubMonitor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,15 +75,9 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
         mMessenger = new Messenger(iBinder);
-        replyMessenger = new Messenger(new Handler(){
-            @Override
-            public void handleMessage(Message msg) {
-                BLEService_ClubMonitor = (ArrayList<Clubmonitor>)msg.obj;
-            }
-        });
+        replyMessenger = new Messenger(new MessageHandler());
     }
 
     @Override
@@ -102,6 +96,14 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
             mMessenger.send(msg);
         }catch (RemoteException e){
             e.printStackTrace();
+        }
+    }
+
+    static class MessageHandler extends Handler{
+        @Override
+        @SuppressWarnings("unchecked")
+        public void handleMessage(Message msg) {
+            BLEService_ClubMonitor = (ArrayList<Clubmonitor>)msg.obj;
         }
     }
 
