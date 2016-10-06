@@ -17,4 +17,6 @@
     <!-- Strings related to pairing -->
     <string name="title_activity_pairing">接続する子機を選択</string>
     <string name="pairing_confirm">接続</string>
+
+    <string name="logout">ログアウト</string>
 </resources>

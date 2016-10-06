@@ -23,6 +23,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.KeyEvent;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -124,6 +125,22 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 		}else{
 			bindBLEService();
 		}
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.mainactivity_menu, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()){
+			case R.id.menu_logout:
+				logout();
+				break;
+		}
+		return true;
 	}
 
 	@Override
@@ -249,6 +266,10 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 		}else {
 			super.onRequestPermissionsResult(requestCode, permissions ,grantResults);
 		}
+	}
+
+	private void logout(){
+		//TODO logoutする
 	}
 
 	private void showToast(String text){
