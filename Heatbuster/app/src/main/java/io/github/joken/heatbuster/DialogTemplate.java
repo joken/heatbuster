@@ -251,10 +251,21 @@ public class DialogTemplate extends DialogFragment {
 			return this;
 		}
 
+
+		/**
+		 * DialogがAlertDialogかProgressDialogか.
+		 *
+		 * @param isprogress trueならProgressDialog、falseならAlertDialog(デフォルトはfalse)
+		 * */
+		public Builder isProgress(final boolean isprogress){
+			misProgress = isprogress;
+			return this;
+		}
+
 		/**
 		 * DialogFragment を Builder に設定した情報を元に show する.
 		 */
-		public void show() {
+		public DialogTemplate show() {
 			final Bundle args = new Bundle();
 			args.putString("title", mTitle);
 			args.putString("message", mMessage);
@@ -279,6 +290,7 @@ public class DialogTemplate extends DialogFragment {
 			} else {
 				f.show(mActivity.getSupportFragmentManager(), mTag);
 			}
+			return f;
 		}
 
 		/**
@@ -359,6 +371,8 @@ public class DialogTemplate extends DialogFragment {
 			if (!TextUtils.isEmpty(message)) {
 				builder.setMessage(message);
 			}
+			//!注意! StyleがSpinner固定です!
+			builder.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 			return builder;
 		}
 	}
