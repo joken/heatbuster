@@ -157,7 +157,7 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            String query = "http://mofutech.net:4545/group/list?token="+Hawk.get("token")+"}";
+            String query = "http://mofutech.net:4545/group/list?token="+Hawk.get("token");
             try{
                 run(query);
                 return true;

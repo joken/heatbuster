@@ -22,6 +22,8 @@ import android.widget.TextView;
 import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.orhanobut.hawk.Hawk;
 
+import org.json.JSONObject;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -195,7 +197,7 @@ public class LoginActivity extends Activity {
 
 		@Override
 		protected Boolean doInBackground(Void... params) {
-			String query = loginApi+"?username"+mID+"&password={"+md5(mPassword)+"}";
+			String query = loginApi+"?username="+mID+"&password="+md5(mPassword);
 			String result=null;
 			Request request = new Request.Builder().url(query).build();
 			try {
@@ -242,9 +244,17 @@ public class LoginActivity extends Activity {
 		 * @return 認証成功ならtrue、そうでないならfalse
 		 */
 		private boolean parseResult(String query) {
-			//TODO ロジックの実装
-			//TODO tokenのセット(成功時)
-			token = "onononon!";
+			try {
+				JSONObject item = new JSONObject(query);
+				if (item.getString("success").equals("true")) {
+					token = item.getJSONObject("result").getString("token");
+				} else {
+					return false;
+				}
+			}catch (Exception e){
+				e.printStackTrace();
+				return false;
+			}
 			Hawk.init(getApplicationContext()).build();
 			Hawk.put("token",token);
 			return true;

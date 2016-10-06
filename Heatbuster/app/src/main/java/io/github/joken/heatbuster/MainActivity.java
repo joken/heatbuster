@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
@@ -47,7 +48,7 @@ import com.orhanobut.hawk.Hawk;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public class MainActivity extends AppCompatActivity implements ServiceConnection{
+public class MainActivity extends AppCompatActivity implements ServiceConnection,DialogTemplate.Callback{
 
 	@BindView(R.id.clublistView)
 	ListView clublistView;
@@ -67,7 +68,9 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 	/** コンテキストメニュー生成時に選択された部活動のIndex */
 	private int currentClub;
 	/** BLEServiceとの通信時に使用 */
-	private Messenger mMessenger;
+	private Messenger mMessenger,replyMessenger;
+
+	private MainActivity activity=this;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -118,7 +121,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 	}
 
 	private void getToken() {
-		mToken = Hawk.get("token", null);
+		mToken = Hawk.get("token");
 		if(mToken == null){
 			Intent loginIntent = new Intent(getApplication(), LoginActivity.class);
 			startActivityForResult(loginIntent, LOGIN_REQUEST_CODE);
@@ -269,6 +272,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 	}
 
 	private void logout(){
+		Logout logoutAsync = new Logout();
+		logoutAsync.execute();
 		//TODO logoutする
 	}
 
@@ -289,6 +294,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
 	public void sendToken(String token){
 		Message msg = Message.obtain(null, BLEService.TOKEN_ADD, token);
+		replyMessenger = new Messenger(new Handler());
+		msg.replyTo=replyMessenger;
 		sendMessage(msg);
 	}
 
@@ -317,6 +324,16 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 			e.printStackTrace();
 			Toast.makeText(this.getApplicationContext(), "子機が正常に追加できませんでした。", Toast.LENGTH_SHORT).show();
 		}
+	}
+
+	@Override
+	public void onMyDialogSucceeded(int requestCode, int resultCode, Bundle params) {
+
+	}
+
+	@Override
+	public void onMyDialogCancelled(int requestCode, Bundle params) {
+
 	}
 
 	/** BLEServiceからの情報を受信する */
@@ -456,6 +473,55 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 			}
 		}catch (Exception e){
 			e.printStackTrace();
+		}
+	}
+
+	class Logout extends AsyncTask<Void, Void, Boolean>{
+		OkHttpClient client;
+		private DialogTemplate dialog;
+		String jsondata;
+
+		public Logout(){
+			super();
+			client = new OkHttpClient();
+		}
+
+		void run(String url) throws IOException {
+			Request request = new Request.Builder()
+					.url(url)
+					.build();
+
+			Response response = client.newCall(request).execute();
+			this.jsondata = response.body().string();
+		}
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			dialog = new DialogTemplate.Builder(activity)
+					.message("logout now...")
+					.isProgress(true)
+					.show();
+		}
+
+		@Override
+		protected Boolean doInBackground(Void... params) {
+			String query = "http://mofutech.net:4545/logout?token="+Hawk.get("token")+"}";
+			try{
+				run(query);
+				return true;
+			}catch (Exception e){
+				e.printStackTrace();
+				return false;
+			}
+		}
+
+		@Override
+		protected void onPostExecute(final Boolean success){
+			Hawk.deleteAll();
+			//TODO: ここにはBLEとのコネクションを全部切ってサービスをfinish()する処理が入りそう。
+			dialog.dismiss();
+			finish();
 		}
 	}
 
