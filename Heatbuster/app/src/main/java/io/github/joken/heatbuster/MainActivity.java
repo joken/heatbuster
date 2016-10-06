@@ -162,6 +162,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 		switch (item.getItemId()) {
 			case R.id.connect:
 				Intent intent = new Intent(getApplication(), PairingActivity.class);
+				intent.putExtra("GID");
+				//TODO: なんとかしてGIDを渡したい
 				startActivityForResult(intent, PAIRING_REQUEST_CODE);
 				return true;
 			case R.id.reverce_one:
@@ -407,7 +409,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 				jsonOneData.put("stat", conDevice.getStat());
 				itemArray.put(jsonOneData);
 			}
-			jsonOneData.put("elements",itemArray);
+			jsonOneData.put("element",itemArray);
 
 		}catch (Exception e){
 			e.printStackTrace();

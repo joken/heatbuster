@@ -219,6 +219,7 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
     class joinClubinServer extends AsyncTask<Void, Void, Boolean> {
         OkHttpClient client;
         ArrayList<CheckBoxItem> joinclublist;
+        private DialogTemplate dialog;
 
         public joinClubinServer(ArrayList<CheckBoxItem> joinclublist) {
             super();
@@ -237,6 +238,15 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
         }
 
         @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            this.dialog = new DialogTemplate.Builder(activity)
+                    .message("serverと通信しています")
+                    .isProgress(true)
+                    .show();
+        }
+
+        @Override
         protected Boolean doInBackground(Void... params) {
             for (CheckBoxItem club : joinclublist) {
                 String query = "http://mofutech.net:4545/group/" + club.getGid() + "/join?token=" + Hawk.get("token");
@@ -248,6 +258,11 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
                 }
             }
             return true;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success){
+            this.dialog.dismiss();
         }
     }
 }
