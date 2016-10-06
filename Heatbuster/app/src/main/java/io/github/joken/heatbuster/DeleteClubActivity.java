@@ -118,7 +118,7 @@ public class DeleteClubActivity extends AppCompatActivity implements ServiceConn
         @Override
         protected Boolean doInBackground(Void... params) {
             for (CheckBoxItem club : deleteclublist) {
-                String query = "http://mofutech:4545/group/" + club.getGid() + "/leave?token={" + Hawk.get("token") + "}";
+                String query = "http://mofutech.net:4545/group/" + club.getGid() + "/leave?token={" + Hawk.get("token") + "}";
                 try {
                     run(query);
                 } catch (Exception e) {

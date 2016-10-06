@@ -185,7 +185,7 @@ public class LoginActivity extends Activity {
 		private final OkHttpClient mclient;
 		private String token;
 
-		private static final String loginApi = "http://mofutech:4545/login";
+		private static final String loginApi = "http://mofutech.net:4545/login";
 
 		UserLoginTask(String ID, String password) {
 			mID = ID;

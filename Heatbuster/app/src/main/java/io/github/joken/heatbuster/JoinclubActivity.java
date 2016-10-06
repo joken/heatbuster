@@ -53,7 +53,8 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
         //BLEServiceと接続
         Intent intent = new Intent(JoinclubActivity.this, BLEService.class);
         bindService(intent, this, 0);
-        sendClubListRequest();
+
+        BLEService_ClubMonitor = new ArrayList<>();
 
         getClubList getClubListAsync = new getClubList();
         getClubListAsync.execute();
@@ -85,6 +86,7 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
         mMessenger = new Messenger(iBinder);
         replyMessenger = new Messenger(new MessageHandler());
+        sendClubListRequest();
     }
 
     @Override
@@ -155,7 +157,7 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            String query = "http://mofutech:4545/group/list?token="+Hawk.get("token")+"}";
+            String query = "http://mofutech.net:4545/group/list?token="+Hawk.get("token")+"}";
             try{
                 run(query);
                 return true;
@@ -193,7 +195,8 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
         ArrayList<Clubmonitor> joinableclublist = new ArrayList<>();
         try {
             JSONObject item = new JSONObject(jsondata);
-            if (item.getString("success") == "true"){
+            Log.d("hoge",item.getString("result"));
+            if (item.getString("result").equals("true")){
                 JSONArray clublist = item.getJSONArray("result");
                 for (int i=0; i<clublist.length(); i++){
                     JSONObject clubJson =clublist.getJSONObject(i);
@@ -201,13 +204,10 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
                     joinableclublist.add(club);
                 }
 
-            }else{
-                Log.d("DownClublist:","部活の取得失敗");
-                return null;
             }
         } catch (Exception e){
             e.printStackTrace();
-            return null;
+            return joinableclublist;
         }
         return joinableclublist;
     }
@@ -234,7 +234,7 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
         @Override
         protected Boolean doInBackground(Void... params) {
             for (CheckBoxItem club : joinclublist) {
-                String query = "http://mofutech:4545/group/" + club.getGid() + "/join?token={" + Hawk.get("token") + "}";
+                String query = "http://mofutech.net:4545/group/" + club.getGid() + "/join?token={" + Hawk.get("token") + "}";
                 try {
                     run(query);
                 } catch (Exception e) {

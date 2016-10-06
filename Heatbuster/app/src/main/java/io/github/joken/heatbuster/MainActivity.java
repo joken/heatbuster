@@ -336,7 +336,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
 		@Override
 		protected Boolean doInBackground(Void... params) {
-			String query = "http://mofutech:4545/group/"+gid+"/mod/update";
+			String query = "http://mofutech.net:4545/group/"+gid+"/mod/update";
 			try{
 				post(query);
 				return true;
@@ -397,7 +397,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
 		@Override
 		protected Boolean doInBackground(Void... params) {
-			String query = "http://mofutech:4545/group/"+gid+"/mod/status";
+			String query = "http://mofutech.net:4545/group/"+gid+"/mod/status";
 			try{
 				downparce(club,run(query));
 				return true;

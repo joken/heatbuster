@@ -46,7 +46,7 @@ public class BLEService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId){
-		Hawk.init(getApplicationContext());
+		Hawk.init(getApplicationContext()).build();
 		token = Hawk.get("token");//Tokenをセット
 		clubList = new ArrayList<>();
 
