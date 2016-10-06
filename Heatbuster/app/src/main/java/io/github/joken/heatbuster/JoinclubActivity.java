@@ -34,7 +34,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class JoinclubActivity extends AppCompatActivity implements ServiceConnection{
+public class JoinclubActivity extends AppCompatActivity implements ServiceConnection,DialogTemplate.Callback{
 
     @BindView(R.id.joinclub)
     ListView joinView;
@@ -42,6 +42,7 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
     private CheckboxListAdapter checkAdaper;
     private Messenger mMessenger,replyMessenger;
     private static ArrayList<Clubmonitor> BLEService_ClubMonitor;
+    private JoinclubActivity activity = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +106,16 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
         }
     }
 
+    @Override
+    public void onMyDialogSucceeded(int requestCode, int resultCode, Bundle params) {
+
+    }
+
+    @Override
+    public void onMyDialogCancelled(int requestCode, Bundle params) {
+
+    }
+
     static class MessageHandler extends Handler{
         @Override
         @SuppressWarnings("unchecked")
@@ -116,6 +127,7 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
     class getClubList extends AsyncTask<Void, Void, Boolean> {
         OkHttpClient client;
         ArrayList<Clubmonitor> joinableclublist;
+        private DialogTemplate dialog;
 
         public getClubList(){
             super();
@@ -130,6 +142,15 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
 
             Response response = client.newCall(request).execute();
             this.joinableclublist = joinparce(response.body().string());
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            dialog = new DialogTemplate.Builder(activity)
+                    .message("clubを読み込んでいます")
+                    .isProgress(true)
+                    .show();
         }
 
         @Override
@@ -164,6 +185,7 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
             checkAdaper = new CheckboxListAdapter(JoinclubActivity.this,joinclubList);
             joinView.setAdapter(checkAdaper);
             registerForContextMenu(joinView);
+            dialog.dismiss();
         }
     }
 
