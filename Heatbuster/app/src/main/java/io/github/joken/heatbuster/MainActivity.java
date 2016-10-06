@@ -316,6 +316,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 		bundle.putSerializable(BLEService.JOINING_CLUB, list);
 		Message msg = Message.obtain(null, BLEService.JOIN_CLUB);
 		msg.setData(bundle);
+		replyMessenger = new Messenger(new Handler());
+		msg.replyTo=replyMessenger;
 		sendMessage(msg);
 	}
 

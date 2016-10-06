@@ -43,6 +43,7 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
     private Messenger mMessenger,replyMessenger;
     private static ArrayList<Clubmonitor> BLEService_ClubMonitor;
     private JoinclubActivity activity = this;
+    private static getClubList getClubListAsync;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,8 +57,8 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
 
         BLEService_ClubMonitor = new ArrayList<>();
 
-        getClubList getClubListAsync = new getClubList();
-        getClubListAsync.execute();
+
+        getClubListAsync = new getClubList();
 
     }
 
@@ -123,6 +124,7 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
         @SuppressWarnings("unchecked")
         public void handleMessage(Message msg) {
             BLEService_ClubMonitor = (ArrayList<Clubmonitor>)msg.obj;
+            getClubListAsync.execute();
         }
     }
 
@@ -172,16 +174,18 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
             ArrayList<CheckBoxItem> joinclubList = new ArrayList<CheckBoxItem>();
             for (Clubmonitor club: joinableclublist){
                 Boolean contained = false;
-                for (Clubmonitor BLEclub: BLEService_ClubMonitor){
-                    if (BLEclub.getName().equals(club.getName())){
-                        contained = true;
-                        break;
+                if (!(BLEService_ClubMonitor.isEmpty())) {
+                    for (Clubmonitor BLEclub : BLEService_ClubMonitor) {
+                        if (BLEclub.getName().equals(club.getName())) {
+                            contained = true;
+                            break;
+                        }
                     }
-                }
-                if (!(contained)){
-                    CheckBoxItem joinclub = new CheckBoxItem(club.getName());
-                    joinclub.setGid(club.getGid());
-                    joinclubList.add(joinclub);
+                    if (!(contained)) {
+                        CheckBoxItem joinclub = new CheckBoxItem(club.getName());
+                        joinclub.setGid(club.getGid());
+                        joinclubList.add(joinclub);
+                    }
                 }
             }
             checkAdaper = new CheckboxListAdapter(JoinclubActivity.this,joinclubList);
