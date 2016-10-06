@@ -157,7 +157,7 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            String query = "http://mofutech.net:4545/group/list?token="+Hawk.get("token");
+            String query = "http://mofutech.net:4545/group/alllist?token="+Hawk.get("token");
             try{
                 run(query);
                 return true;
@@ -195,8 +195,8 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
         ArrayList<Clubmonitor> joinableclublist = new ArrayList<>();
         try {
             JSONObject item = new JSONObject(jsondata);
-            Log.d("hoge",item.getString("result"));
-            if (item.getString("result").equals("true")){
+            Log.d("hoge",item.getString("success"));
+            if (item.getString("success").equals("true")){
                 JSONArray clublist = item.getJSONArray("result");
                 for (int i=0; i<clublist.length(); i++){
                     JSONObject clubJson =clublist.getJSONObject(i);

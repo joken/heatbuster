@@ -209,8 +209,9 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 				break;
 			case LOGIN_REQUEST_CODE:
 				if(resultcode == RESULT_OK){
-					mToken = data.getStringExtra("token");
-					sendToken(mToken);
+					mToken = data.getStringExtra("TOKEN");
+					//Log.d("hogehogehoge",mToken);
+					startBLEService();
 				}else{
 					finish();
 				}
@@ -285,6 +286,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 	@Override
 	public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
 		mMessenger = new Messenger(iBinder);
+		sendToken(mToken);
 	}
 
 	@Override

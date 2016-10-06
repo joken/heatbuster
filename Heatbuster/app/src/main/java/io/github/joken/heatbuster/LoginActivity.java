@@ -222,7 +222,7 @@ public class LoginActivity extends Activity {
 
 			if (true) {//TODO デバッグ終了後に条件文に変更する
 				Intent intent = new Intent(getApplication(), MainActivity.class);
-				intent.putExtra("token", token);
+				intent.putExtra("TOKEN", token);
 				setResult(RESULT_OK, intent);
 				finish();
 			} else {
