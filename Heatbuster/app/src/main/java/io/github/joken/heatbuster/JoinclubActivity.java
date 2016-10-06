@@ -232,13 +232,14 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
                     .build();
 
             Response response = client.newCall(request).execute();
+            response.body().string();
             //TODO: 遅れなかった時の処理を書いていません
         }
 
         @Override
         protected Boolean doInBackground(Void... params) {
             for (CheckBoxItem club : joinclublist) {
-                String query = "http://mofutech.net:4545/group/" + club.getGid() + "/join?token={" + Hawk.get("token") + "}";
+                String query = "http://mofutech.net:4545/group/" + club.getGid() + "/join?token=" + Hawk.get("token");
                 try {
                     run(query);
                 } catch (Exception e) {

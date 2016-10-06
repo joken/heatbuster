@@ -42,7 +42,6 @@ public class DeleteClubActivity extends AppCompatActivity implements ServiceConn
         //BLEServiceと接続
         Intent intent = new Intent(DeleteClubActivity.this, BLEService.class);
         bindService(intent, this, 0);
-        sendClubListRequest();
     }
 
     @Override
@@ -51,7 +50,7 @@ public class DeleteClubActivity extends AppCompatActivity implements ServiceConn
         unbindService(this);
     }
 
-    public void registMenu(ArrayList<Clubmonitor> clublist){
+    public  void registMenu(ArrayList<Clubmonitor> clublist){
         ArrayList<CheckBoxItem> deleteclubList = new ArrayList<CheckBoxItem>();
         for (Clubmonitor club:clublist){
             CheckBoxItem deleteclub = new CheckBoxItem(club.getName());
@@ -67,6 +66,7 @@ public class DeleteClubActivity extends AppCompatActivity implements ServiceConn
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
         mMessenger = new Messenger(iBinder);
         replyMessenger = new Messenger(new MessageHandler());
+        sendClubListRequest();
     }
 
     @Override

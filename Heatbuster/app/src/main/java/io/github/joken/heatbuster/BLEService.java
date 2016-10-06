@@ -14,8 +14,12 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.util.Log;
 
 import com.orhanobut.hawk.Hawk;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -99,6 +103,66 @@ public class BLEService extends Service {
 
 	private void startBLEGatt(){
 		//TODO 別スレッドで監視する
+	}
+
+	/** serverに対してクラブごとに全てのBLEの情報をおくる**/
+	private void UploadtoServer(){}
+
+	/**1部活のデバイスリストを受け取ると送信用のJSONを吐く機械**/
+	private String MakingJson(ArrayList<CheckBoxItem> devicelist){
+		// jsonデータの作成
+		JSONObject jsonOneData;
+
+		try {
+			jsonOneData = new JSONObject();
+			jsonOneData.put("token", Hawk.get("token"));
+
+			JSONArray itemArray = new JSONArray();
+			for (CheckBoxItem conDevice : devicelist) {
+				jsonOneData = new JSONObject();
+				jsonOneData.put("mac", conDevice.getSerial());
+				jsonOneData.put("temp", conDevice.getTemple());
+				jsonOneData.put("wet", conDevice.getHumid());
+				jsonOneData.put("stat", conDevice.getStat());
+				itemArray.put(jsonOneData);
+			}
+			jsonOneData.put("elements",itemArray);
+
+		}catch (Exception e){
+			e.printStackTrace();
+			return "";
+		}
+		return jsonOneData.toString();
+	}
+
+	/**serverから定期的に部活ごとに平均温度と湿度、STATを受け取ってClublistのClubmonitorそれぞれに入れ込む処理**/
+	private void DownloadatServer(){}
+	/**1部活ごとに平均温度と湿度、STATを受け取って引数の部活に入れ込んであげる処理**/
+	private void JsonInputtoClub(Clubmonitor club,String jsondata){
+		try {
+			JSONObject item = new JSONObject(jsondata);
+			if (item.getString("success") == "true"){
+				JSONObject item2 = item.getJSONObject("result");
+				club.setClubTemp(Float.valueOf(item2.getString("temp")));
+				club.setTempIncreaseRate(Float.valueOf(item2.getString("wet")));
+				switch (item2.getString("stat")){
+					case "EMER":
+						club.setSelfStatus(TemperatureStatus.Emergency);
+						Intent i = new Intent(getApplicationContext(),WorningActivity.class);
+						i.putExtra("CLUBNAME",club.getName());
+						startActivity(i);
+						break;
+					case "WARN":
+						club.setSelfStatus(TemperatureStatus.Warning);
+						break;
+					case "SAFE":
+						club.setSelfStatus(TemperatureStatus.Safe);
+						break;
+				}
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+		}
 	}
 
 	@Override
