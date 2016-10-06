@@ -38,7 +38,10 @@ public class BLEService extends Service {
 	public static final int CLUBLIST_REQUEST = 45454545;//clubListを要求されたときのID
 	public static final int JOIN_CLUB = 993;//部活動追加時のID
 
+	private static final int SERVER_DOWNLOAD_DELAY = 10000;//鯖と通信する頻度(msec)
+
 	private Messenger mMessenger;//メッセンジャー
+	private Handler mHandler;//Timer用
 	private static String token;//LoginToken
 	private static ArrayList<Clubmonitor> clubList;//監視リスト
 	private BluetoothAdapter mBluetoothAdapter;
@@ -46,6 +49,7 @@ public class BLEService extends Service {
 
 	public BLEService() {
 		initGattCallBack();
+		mHandler = new Handler();
 	}
 
 	@Override
@@ -106,7 +110,14 @@ public class BLEService extends Service {
 	}
 
 	/** serverに対してクラブごとに全てのBLEの情報をおくる**/
-	private void UploadtoServer(){}
+	private void UploadtoServer(){
+		mHandler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				//TODO 通信して
+			}
+		},SERVER_DOWNLOAD_DELAY);
+	}
 
 	/**1部活のデバイスリストを受け取ると送信用のJSONを吐く機械**/
 	private String MakingJson(ArrayList<CheckBoxItem> devicelist){
