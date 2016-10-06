@@ -15,6 +15,8 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 
+import com.orhanobut.hawk.Hawk;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -44,7 +46,8 @@ public class BLEService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId){
-		token = intent.getStringExtra("token");//Tokenをセット
+		Hawk.init(getApplicationContext());
+		token = Hawk.get("token");//Tokenをセット
 		clubList = new ArrayList<>();
 
 		// Initializes Bluetooth adapter.
