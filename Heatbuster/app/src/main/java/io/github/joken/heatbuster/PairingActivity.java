@@ -127,8 +127,7 @@ public class PairingActivity extends AppCompatActivity {
 			Toast.makeText(this.getApplicationContext(),"1つ以上の子機を選択してください。",Toast.LENGTH_LONG).show();
 			return;
 		}
-		//TODO:GIDが無いと通信できない。
-		AddSerialServer(MakingJson(checked)).execute();
+		new AddSerialServer(getIntent().getStringExtra("GID"), MakingJson(checked)).execute();
         Intent intent = new Intent();
         intent.putExtra("pairlist",checked);
         setResult(RESULT_OK,intent);

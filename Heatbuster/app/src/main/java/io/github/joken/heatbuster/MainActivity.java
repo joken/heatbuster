@@ -158,12 +158,10 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
 		switch (item.getItemId()) {
 			case R.id.connect:
 				Intent intent = new Intent(getApplication(), PairingActivity.class);
-				intent.putExtra("GID");
-				//TODO: なんとかしてGIDを渡したい
+				intent.putExtra("GID", clubAdapter.clubmonitorsList.get(currentClub).getGid());
 				startActivityForResult(intent, PAIRING_REQUEST_CODE);
 				return true;
 			case R.id.reverce_one:
