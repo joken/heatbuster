@@ -290,6 +290,14 @@ public class BLEService extends Service {
 					break;
 				case JOIN_CLUB:
 					clubList = (ArrayList<Clubmonitor>)msg.getData().getSerializable(JOINING_CLUB);
+					Messenger reply1 = msg.replyTo;
+					if (reply1 != null){
+						try{
+							reply1.send(Message.obtain(null,0));
+						}catch (RemoteException e){
+							e.printStackTrace();
+						}
+					}
 					break;
 			}
 		}

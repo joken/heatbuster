@@ -92,7 +92,7 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
     @Override
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
         mMessenger = new Messenger(iBinder);
-        replyMessenger = new Messenger(new MessageHandler());
+        replyMessenger = new Messenger(new MessageClubListHandler());
         sendClubListRequest();
     }
 
@@ -125,7 +125,7 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
 
     }
 
-    static class MessageHandler extends Handler{
+    static class MessageClubListHandler extends Handler{
         @Override
         @SuppressWarnings("unchecked")
         public void handleMessage(Message msg) {

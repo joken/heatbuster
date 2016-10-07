@@ -70,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 	/** BLEServiceとの通信時に使用 */
 	private Messenger mMessenger,replyMessenger;
 	private static ArrayList<Clubmonitor> BLEService_ClubMonitor;
+	private static Boolean mustDownBLEClubs=false;
 
 	private MainActivity activity=this;
 
@@ -109,17 +110,28 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
 	private void initClubListView() {
 		//TODO GroupListの取得で部活動を追加する
-		//ArrayList<Clubmonitor> personList = new ArrayList<>();
-		//personList.add(new Clubmonitor("1","野球部", 41.2f, TemperatureStatus.Emergency));
-		//personList.add(new Clubmonitor("2","サッカー部", 27.4f, TemperatureStatus.Safe));
-		//personList.add(new Clubmonitor("3","テニス部", 26.7f, TemperatureStatus.Safe));
-		//personList.add(new Clubmonitor("4","女子バレー部", 28.9f, TemperatureStatus.Warning));
-		//personList.add(new Clubmonitor("5","卓球部", 27.2f, TemperatureStatus.Safe));
 		BLEService_ClubMonitor = new ArrayList<>();
 		clubAdapter = new ClubmonitorAdapter(MainActivity.this, BLEService_ClubMonitor);
 
 		clublistView.setAdapter(clubAdapter);
 		registerForContextMenu(clublistView);
+		viewUpdate();
+	}
+
+	Handler viewUpdatehandler = new Handler();
+	public void viewUpdate(){
+		viewUpdatehandler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				if( mustDownBLEClubs){sendClubListRequest(); mustDownBLEClubs=false;}
+				if (!(BLEService_ClubMonitor.isEmpty())) {
+					for (Clubmonitor club : BLEService_ClubMonitor) {
+						UpdateClubView(club);
+					}
+				}
+				viewUpdatehandler.postDelayed(this, 100);
+			}
+		}, 100);
 	}
 
 	private void getToken() {
@@ -206,10 +218,13 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 			case JOIN_REQUEST_CODE:
 				if(resultcode==RESULT_OK){
 					ArrayList<CheckBoxItem> joinList = (ArrayList<CheckBoxItem>) data.getSerializableExtra("joinlist");
-					sendJoinList(joinList);
+					ArrayList<Clubmonitor> joinmonitors = new ArrayList<>();
 					for(CheckBoxItem item : joinList){
-						clubAdapter.clubmonitorsList.add(convertCheckBoxToCkubMonitor(item));
+						Clubmonitor itemc =convertCheckBoxToCkubMonitor(item);
+						clubAdapter.clubmonitorsList.add(itemc);
+						joinmonitors.add(itemc);
 					}
+					sendJoinList(joinmonitors);
 				}
 				break;
 			case LOGIN_REQUEST_CODE:
@@ -319,15 +334,17 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 		bundle.putInt(BLEService.CLUB_INDEX ,clubindex);
 		Message msg = Message.obtain(null, BLEService.BLE_ADD_DEVICE);
 		msg.setData(bundle);//メッセージ化
+		replyMessenger = new Messenger(new Handler());
+		msg.replyTo=replyMessenger;
 		sendMessage(msg);
 	}
 
-	public void sendJoinList(ArrayList<CheckBoxItem> list){
+	public void sendJoinList(ArrayList<Clubmonitor> list){
 		Bundle bundle = new Bundle();
 		bundle.putSerializable(BLEService.JOINING_CLUB, list);
 		Message msg = Message.obtain(null, BLEService.JOIN_CLUB);
 		msg.setData(bundle);
-		replyMessenger = new Messenger(new Handler());
+		replyMessenger = new Messenger(new MessageJoinClubHandler());
 		msg.replyTo=replyMessenger;
 		sendMessage(msg);
 	}
@@ -363,6 +380,14 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 		@SuppressWarnings("unchecked")
 		public void handleMessage(Message msg) {
 			BLEService_ClubMonitor = (ArrayList<Clubmonitor>)msg.obj;
+		}
+	}
+
+	static class MessageJoinClubHandler extends Handler{
+		@Override
+		@SuppressWarnings("unchecked")
+		public void handleMessage(Message msg) {
+			mustDownBLEClubs=true;
 		}
 	}
 
