@@ -334,6 +334,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
 	private void sendClubListRequest(){
 		Message message = Message.obtain(null, BLEService.CLUBLIST_REQUEST);
+		replyMessenger = new Messenger(new MessageHandler());
 		message.replyTo = replyMessenger;
 		sendMessage(message);
 	}
