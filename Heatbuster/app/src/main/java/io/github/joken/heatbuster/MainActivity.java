@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 	private int currentClub;
 	/** BLEServiceとの通信時に使用 */
 	private Messenger mMessenger,replyMessenger;
+	private static ArrayList<Clubmonitor> BLEService_ClubMonitor;
 
 	private MainActivity activity=this;
 
@@ -108,13 +109,14 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
 	private void initClubListView() {
 		//TODO GroupListの取得で部活動を追加する
-		ArrayList<Clubmonitor> personList = new ArrayList<>();
-		personList.add(new Clubmonitor("1","野球部", 41.2f, TemperatureStatus.Emergency));
-		personList.add(new Clubmonitor("2","サッカー部", 27.4f, TemperatureStatus.Safe));
-		personList.add(new Clubmonitor("3","テニス部", 26.7f, TemperatureStatus.Safe));
-		personList.add(new Clubmonitor("4","女子バレー部", 28.9f, TemperatureStatus.Warning));
-		personList.add(new Clubmonitor("5","卓球部", 27.2f, TemperatureStatus.Safe));
-		clubAdapter = new ClubmonitorAdapter(MainActivity.this, personList);
+		//ArrayList<Clubmonitor> personList = new ArrayList<>();
+		//personList.add(new Clubmonitor("1","野球部", 41.2f, TemperatureStatus.Emergency));
+		//personList.add(new Clubmonitor("2","サッカー部", 27.4f, TemperatureStatus.Safe));
+		//personList.add(new Clubmonitor("3","テニス部", 26.7f, TemperatureStatus.Safe));
+		//personList.add(new Clubmonitor("4","女子バレー部", 28.9f, TemperatureStatus.Warning));
+		//personList.add(new Clubmonitor("5","卓球部", 27.2f, TemperatureStatus.Safe));
+		sendClubListRequest();
+		clubAdapter = new ClubmonitorAdapter(MainActivity.this, BLEService_ClubMonitor);
 
 		clublistView.setAdapter(clubAdapter);
 		registerForContextMenu(clublistView);
@@ -330,6 +332,12 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 		}
 	}
 
+	private void sendClubListRequest(){
+		Message message = Message.obtain(null, BLEService.CLUBLIST_REQUEST);
+		message.replyTo = replyMessenger;
+		sendMessage(message);
+	}
+
 	@Override
 	public void onMyDialogSucceeded(int requestCode, int resultCode, Bundle params) {
 
@@ -338,6 +346,14 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 	@Override
 	public void onMyDialogCancelled(int requestCode, Bundle params) {
 
+	}
+
+	static class MessageHandler extends Handler{
+		@Override
+		@SuppressWarnings("unchecked")
+		public void handleMessage(Message msg) {
+			BLEService_ClubMonitor = (ArrayList<Clubmonitor>)msg.obj;
+		}
 	}
 
 	/** BLEServiceからの情報を受信する */
@@ -367,7 +383,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 		}
 
 		String post(String url) throws IOException{
-			RequestBody body = RequestBody.create(JSON,json);
+			RequestBody body = 	RequestBody.create(JSON,json);
 			Request request = new Request.Builder()
 					.url(url)
 					.post(body)
@@ -478,6 +494,10 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 		}catch (Exception e){
 			e.printStackTrace();
 		}
+	}
+
+	public void UpdateClubView(Clubmonitor club){
+		clubAdapter.notifyDataSetChanged();
 	}
 
 	class Logout extends AsyncTask<Void, Void, Boolean>{

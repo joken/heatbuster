@@ -26,6 +26,12 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
 public class BLEService extends Service {
 	/** Key-Value方式のKeyあるいはRequest ID */
 	public static final String REQUEST_BLUETOOTH = "request_bluetooth";//BTの有効化リクエストキー
@@ -110,11 +116,24 @@ public class BLEService extends Service {
 	}
 
 	/** serverに対してクラブごとに全てのBLEの情報をおくる**/
-	private void UploadtoServer(){
+	private void UploadtoServer(final Clubmonitor club){
 		mHandler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				//TODO 通信して
+				MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+				OkHttpClient client = new OkHttpClient();
+				String url = "http://mofutech.net:4545/group/"+club.getGid()+"/mod/update";
+				RequestBody body = 	RequestBody.create(JSON,MakingJson(club.getDeviceList()));
+				Request request = new Request.Builder()
+						.url(url)
+						.post(body)
+						.build();
+				try {
+					Response response = client.newCall(request).execute();
+					response.body().string();
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		},SERVER_DOWNLOAD_DELAY);
 	}
@@ -147,7 +166,26 @@ public class BLEService extends Service {
 	}
 
 	/**serverから定期的に部活ごとに平均温度と湿度、STATを受け取ってClublistのClubmonitorそれぞれに入れ込む処理**/
-	private void DownloadatServer(){}
+	private void DownloadatServer(final Clubmonitor club){
+		mHandler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				OkHttpClient client = new OkHttpClient();
+				String url = "http://mofutech.net:4545/group/"+club.getGid()+"/mod/status?token="+Hawk.get("token");
+				try{
+					Request request = new Request.Builder()
+							.url(url)
+							.build();
+
+					Response response = client.newCall(request).execute();
+					String responseJson = response.body().string();
+					JsonInputtoClub(club,responseJson);
+				}catch (Exception e){
+					e.printStackTrace();
+				}
+			}
+		},SERVER_DOWNLOAD_DELAY);
+	}
 	/**1部活ごとに平均温度と湿度、STATを受け取って引数の部活に入れ込んであげる処理**/
 	private void JsonInputtoClub(Clubmonitor club,String jsondata){
 		try {

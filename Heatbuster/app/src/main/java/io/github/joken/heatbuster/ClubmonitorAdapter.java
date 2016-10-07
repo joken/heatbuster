@@ -67,5 +67,4 @@ public class ClubmonitorAdapter extends BaseAdapter{
 
         return convertView;
     }
-
 }
