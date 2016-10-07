@@ -5,7 +5,7 @@ import android.bluetooth.BluetoothDevice;
 import java.io.Serializable;
 
 public class CheckBoxItem implements Serializable{
-    //serialナンバー(今はintに設定しているがどうなるかわからない)
+    //serialナンバー(のつもりだったやつ。いまは部活動名)
     private String serial="N/A";
     //joinclub用のgid
     private String gid="";
@@ -53,6 +53,7 @@ public class CheckBoxItem implements Serializable{
     public void setHumid(float humid){this.humid=humid;}
     public boolean getEmer_flag(){return this.emer_flag;}
     public void setEmer_flag(boolean flag){this.emer_flag=flag;}
+    public TemperatureStatus getselfStat(){return  this.stat;}
     public String getStat(){
         if (this.emer_flag){
             return "EMER";

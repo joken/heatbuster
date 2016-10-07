@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 		//personList.add(new Clubmonitor("3","テニス部", 26.7f, TemperatureStatus.Safe));
 		//personList.add(new Clubmonitor("4","女子バレー部", 28.9f, TemperatureStatus.Warning));
 		//personList.add(new Clubmonitor("5","卓球部", 27.2f, TemperatureStatus.Safe));
-		sendClubListRequest();
+		BLEService_ClubMonitor = new ArrayList<>();
 		clubAdapter = new ClubmonitorAdapter(MainActivity.this, BLEService_ClubMonitor);
 
 		clublistView.setAdapter(clubAdapter);
@@ -207,6 +207,9 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 				if(resultcode==RESULT_OK){
 					ArrayList<CheckBoxItem> joinList = (ArrayList<CheckBoxItem>) data.getSerializableExtra("joinlist");
 					sendJoinList(joinList);
+					for(CheckBoxItem item : joinList){
+						clubAdapter.clubmonitorsList.add(convertCheckBoxToCkubMonitor(item));
+					}
 				}
 				break;
 			case LOGIN_REQUEST_CODE:
@@ -234,6 +237,11 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
 		//権限チェックを投げつける(Android6以上)
 		checkPermission();
+	}
+
+	private Clubmonitor convertCheckBoxToCkubMonitor(CheckBoxItem checkBoxItem){
+		Clubmonitor clubmonitor = new Clubmonitor(checkBoxItem.getGid(), checkBoxItem.getSerial(), checkBoxItem.getTemple(), checkBoxItem.getselfStat());
+		return clubmonitor;
 	}
 
 	private void bindBLEService() {
@@ -289,6 +297,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 	public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
 		mMessenger = new Messenger(iBinder);
 		sendToken(mToken);
+		sendClubListRequest();
 	}
 
 	@Override
