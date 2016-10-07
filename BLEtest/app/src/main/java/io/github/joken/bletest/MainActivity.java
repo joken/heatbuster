@@ -23,6 +23,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -148,12 +151,11 @@ public class MainActivity extends AppCompatActivity {
                     + device.getBondState() + ", address="
                     + device.getAddress() + ", type" + device.getType()
                     + ", uuids=" + uuid;
+            getApplicationContext();
             Log.d("BLEActivity", msg);
-            if (device.getAddress().substring(0,2).equals("FB")){
-                mBluetoothGatt = device.connectGatt(getApplicationContext(), false, mGattCallback);
-                mBluetoothAdapter.stopLeScan(mLeScanCallback);
-                Log.d("connect!!!!!!!!!!!!!!!",msg);
-            }
+            mBluetoothGatt = device.connectGatt(getApplicationContext(), false, mGattCallback);
+            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+            Log.d("connect!!!!!!!!!!!!!!!",msg);
         }
     };
 
@@ -175,27 +177,25 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status){
             Log.d(TAG, "onServicesDiscovered received: " + status);
-            if (status == BluetoothGatt.GATT_SUCCESS){
-                Log.i(TAG,"poyo!");
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                Log.i(TAG, "poyo!");
                 //サービスのリストを取得
-                List <BluetoothGattService> serviceList = gatt.getServices();
-                for (BluetoothGattService service : serviceList){
-                    Log.i(TAG,"poyo!");
-                    //サービスからCharacteristicのリストを取得
-                    List <BluetoothGattCharacteristic> charastic = service.getCharacteristics();
-                    //CharacteristicにNotificationの受信要求を設定
+                BluetoothGattService service = gatt.getService(UUID.fromString("1d180fbd-dd5b-4ca1-ac1b-abbb699afb46"));
+                //サービスからCharacteristicのリストを取得
+                List<BluetoothGattCharacteristic> charastic = service.getCharacteristics();
+                //CharacteristicにNotificationの受信要求を設定
 
-
-                    for (BluetoothGattCharacteristic characteristic: charastic){
-                        Log.d(TAG,"ここまではきたきたきた");
-                        if (characteristic.getUuid().toString().substring(0,2).equals("1d")){
-                            Log.i(TAG,"ifに入った");
-                            mBluetoothCharacteristic=characteristic;
-                        }
-                    }
+                for (BluetoothGattCharacteristic characteristic : charastic) {
+                    Log.d(TAG, "ここまではきたきたきた");
+                    mBluetoothCharacteristic = characteristic;
                 }
-            } else {
-                Log.w(TAG,"onServicesDiscovered received: " + status);
+
+                gatt.setCharacteristicNotification(mBluetoothCharacteristic, true);
+                List<BluetoothGattDescriptor> descriptors = mBluetoothCharacteristic.getDescriptors();
+                for (BluetoothGattDescriptor descriptor:descriptors) {
+                    descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                    gatt.writeDescriptor(descriptor);
+                }
             }
         }
 
@@ -210,17 +210,34 @@ public class MainActivity extends AppCompatActivity {
                         +"-"+read_data[6]+"-"+read_data[7]+"-"+read_data[8]+"-"+read_data[9]);
             }
         }
-        /*
+
         //Notification/Indicateの受信コールバック
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic){
             Log.d(TAG, "onCharacteristicChanged");
             // Characteristicの値更新通知
-            byte[] read_data = characteristic.getValue();
-            Log.i(TAG, "data = "  + "温度[1]" +read_data[1]+"温度[2]" +read_data[2]+"emergency"+read_data[3]+"指数部byte"+read_data[4]
-            +"水蒸気量データ[6]"+read_data[6]+"水蒸気量データ[7]"+read_data[7]+"水蒸気量データ[8]"+read_data[8]+"指数部byte"+read_data[9]);
+            byte[] raw_data = characteristic.getValue();
+            Log.i(TAG, "data = "  + "温度[1]" +raw_data[1]+"温度[2]" +raw_data[2]+"emergency"+raw_data[3]+"指数部byte"+raw_data[4]
+            +"水蒸気量データ[6]"+raw_data[6]+"水蒸気量データ[7]"+raw_data[7]+"水蒸気量データ[8]"+raw_data[8]+"指数部byte"+raw_data[9]);
+            Log.i(TAG,""+raw_data[2]);
+            Log.i(TAG,""+raw_data[1]);
+            String piyo = ""+raw_data[2]+raw_data[1];
+            Log.i(TAG,String.valueOf(Integer.parseInt(piyo,16)));
+            byte[] templebyte0 = Arrays.copyOfRange(raw_data,1,3);
+            byte[] templebyte1 = Arrays.copyOfRange(raw_data,4,5);
+            byte[] templebyte = new byte[templebyte0.length+templebyte1.length];
+            System.arraycopy(templebyte0,0,templebyte,0,templebyte0.length);
+            System.arraycopy(templebyte1,0,templebyte,templebyte0.length,templebyte1.length);
+            try {
+                Log.i("温度",Float.toString(ByteBuffer.wrap(templebyte).order(ByteOrder.LITTLE_ENDIAN).getFloat()));
+                Log.i("湿度",Float.toString(ByteBuffer.wrap(Arrays.copyOfRange(raw_data,6,10)).order(ByteOrder.LITTLE_ENDIAN).getFloat()));
+                Log.i("Emergency",Boolean.toString(ByteBuffer.wrap(Arrays.copyOfRange(raw_data,3,4)).getInt() != 0));
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
+
         }
-        */
+
     };
 
     public void onClickBreak(View v){
