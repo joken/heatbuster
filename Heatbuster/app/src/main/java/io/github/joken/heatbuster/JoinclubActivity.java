@@ -57,9 +57,15 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
 
         BLEService_ClubMonitor = new ArrayList<>();
 
+        checkAdaper = new CheckboxListAdapter(JoinclubActivity.this, new ArrayList<CheckBoxItem>());
+        joinView.setAdapter(checkAdaper);
+        registerForContextMenu(joinView);
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
         getClubListAsync = new getClubList();
-
     }
 
     @Override
@@ -171,26 +177,21 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
 
         @Override
         protected void onPostExecute(final Boolean success){
-            ArrayList<CheckBoxItem> joinclubList = new ArrayList<CheckBoxItem>();
             for (Clubmonitor club: joinableclublist){
                 Boolean contained = false;
-                if (!(BLEService_ClubMonitor.isEmpty())) {
-                    for (Clubmonitor BLEclub : BLEService_ClubMonitor) {
-                        if (BLEclub.getName().equals(club.getName())) {
-                            contained = true;
-                            break;
-                        }
-                    }
-                    if (!(contained)) {
-                        CheckBoxItem joinclub = new CheckBoxItem(club.getName());
-                        joinclub.setGid(club.getGid());
-                        joinclubList.add(joinclub);
+                for (Clubmonitor BLEclub : BLEService_ClubMonitor) {
+                    if (BLEclub.getName().equals(club.getName())) {
+                        contained = true;
+                        break;
                     }
                 }
+                if (!(contained)) {
+                    CheckBoxItem joinclub = new CheckBoxItem(club.getName());
+                    joinclub.setGid(club.getGid());
+                    checkAdaper.checkBoxItemsList.add(joinclub);
+                }
             }
-            checkAdaper = new CheckboxListAdapter(JoinclubActivity.this,joinclubList);
-            joinView.setAdapter(checkAdaper);
-            registerForContextMenu(joinView);
+            checkAdaper.notifyDataSetChanged();
             dialog.dismiss();
         }
     }
