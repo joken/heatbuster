@@ -6,7 +6,10 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -25,6 +28,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.UUID;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -45,12 +49,15 @@ public class BLEService extends Service {
 	public static final int JOIN_CLUB = 993;//部活動追加時のID
 
 	private static final int SERVER_DOWNLOAD_DELAY = 10000;//鯖と通信する頻度(msec)
+	private static final String SERVICE_UUID = "1d180fbd-dd5b-4ca1-ac1b-abbb699afb46";
 
 	private Messenger mMessenger;//メッセンジャー
 	private Handler mHandler;//Timer用
 	private static String token;//LoginToken
 	private static ArrayList<Clubmonitor> clubList;//監視リスト
 	private BluetoothAdapter mBluetoothAdapter;
+	private BluetoothGattCharacteristic mBluetoothGattCharacteristic;
+	private BluetoothGattDescriptor mDescritor;
 	private BluetoothGattCallback mGattCallback;
 
 	public BLEService() {
@@ -90,23 +97,54 @@ public class BLEService extends Service {
 			@Override
 			public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
 				super.onConnectionStateChange(gatt, status, newState);
+				if (newState == BluetoothProfile.STATE_CONNECTED){
+					//接続に成功したらサービスを検索にする
+					gatt.discoverServices();
+				}else if(newState==BluetoothProfile.STATE_DISCONNECTED){
+					//接続が切れたらGATTを空にする
+					mGattCallback=null;
+				}
 			}
 
 			@Override
-			public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-				if(status == BluetoothGatt.GATT_SUCCESS){
-					CheckBoxItem bleDeveice = new CheckBoxItem(gatt.getDevice().getName());
-					byte[] raw_data = characteristic.getValue();
-					byte[] templebyte0 = Arrays.copyOfRange(raw_data,1,3);
-					byte[] templebyte1 = Arrays.copyOfRange(raw_data,4,5);
-					byte[] templebyte = new byte[templebyte0.length+templebyte1.length];
-					System.arraycopy(templebyte0,0,templebyte,0,templebyte0.length);
-					System.arraycopy(templebyte1,0,templebyte,templebyte0.length,templebyte1.length);
-					bleDeveice.setTemple(ByteBuffer.wrap(templebyte).order(ByteOrder.LITTLE_ENDIAN).getFloat());
-					bleDeveice.setHumid(ByteBuffer.wrap(Arrays.copyOfRange(raw_data,6,10)).order(ByteOrder.LITTLE_ENDIAN).getFloat());
-					bleDeveice.setEmer_flag((ByteBuffer.wrap(Arrays.copyOfRange(raw_data,3,4)).getInt() != 0));
-					//TODO パースして結果をなにかに格納する
+			public void onServicesDiscovered(BluetoothGatt gatt, int status){
+				// サービスが見つかったら実行.
+				if (status == BluetoothGatt.GATT_SUCCESS) {
+					// UUIDが同じかどうかを確認する.
+					BluetoothGattService service = gatt.getService(UUID.fromString(SERVICE_UUID));
+					if (service != null) {
+						// 指定したUUIDを持つキャラクタリスティックを確認する.
+						for (BluetoothGattCharacteristic characteristic:service.getCharacteristics()){
+							mBluetoothGattCharacteristic = characteristic;
+						}
+
+						if (mBluetoothGattCharacteristic != null) {
+							// キャラクタリスティックが見つかったら、Notificationをリクエスト.
+							boolean registered = gatt.setCharacteristicNotification(mBluetoothGattCharacteristic, true);
+
+							for (BluetoothGattDescriptor descriptor:mBluetoothGattCharacteristic.getDescriptors()){
+								mDescritor = descriptor;
+							}
+							mDescritor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+							gatt.writeDescriptor(mDescritor);
+						}
+					}
 				}
+			}
+
+			@Override
+			public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
+				CheckBoxItem bleDeveice = new CheckBoxItem(gatt.getDevice().getName());
+				byte[] raw_data = characteristic.getValue();
+				byte[] templebyte0 = Arrays.copyOfRange(raw_data,1,3);
+				byte[] templebyte1 = Arrays.copyOfRange(raw_data,4,5);
+				byte[] templebyte = new byte[templebyte0.length+templebyte1.length];
+				System.arraycopy(templebyte0,0,templebyte,0,templebyte0.length);
+				System.arraycopy(templebyte1,0,templebyte,templebyte0.length,templebyte1.length);
+				bleDeveice.setTemple(ByteBuffer.wrap(templebyte).order(ByteOrder.LITTLE_ENDIAN).getFloat());
+				bleDeveice.setHumid(ByteBuffer.wrap(Arrays.copyOfRange(raw_data,6,10)).order(ByteOrder.LITTLE_ENDIAN).getFloat());
+				bleDeveice.setEmer_flag((ByteBuffer.wrap(Arrays.copyOfRange(raw_data,3,4)).getInt() != 0));
+				//TODO 実際にテストして
 			}
 		};
 	}
