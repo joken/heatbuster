@@ -2,7 +2,6 @@ package io.github.joken.heatbuster;
 
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
@@ -13,11 +12,11 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.os.StrictMode;
 import android.util.Log;
 
 import com.orhanobut.hawk.Hawk;
@@ -25,10 +24,7 @@ import com.orhanobut.hawk.Hawk;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.UUID;
 
 import okhttp3.MediaType;
@@ -50,10 +46,12 @@ public class BLEService extends Service {
 	public static final int JOIN_CLUB = 993;//部活動追加時のID
 
 	private static final int SERVER_DOWNLOAD_DELAY = 10000;//鯖と通信する頻度(msec)
+	public static final String BLE_THREAD = "BLE-Thread";//スレッドにつく名前(Tag)
 	private static final String SERVICE_UUID = "1d180fbd-dd5b-4ca1-ac1b-abbb699afb46";
 
 	private Messenger mMessenger;//メッセンジャー
-	private Handler mHandler;//Timer用
+	private Handler mBackGroundHandler;//Timer用 runnableをpost(送信)するブツ
+	private HandlerThread mHandlerThread;//runnableをrun(実行)するブツ 別スレッド実行
 	private static String token;//LoginToken
 	private static ArrayList<Clubmonitor> clubList;//監視リスト
 	private BluetoothAdapter mBluetoothAdapter;
@@ -62,8 +60,6 @@ public class BLEService extends Service {
 	private BluetoothGattCallback mGattCallback;
 
 	public BLEService() {
-		initGattCallBack();
-		mHandler = new Handler();
 	}
 
 	@Override
@@ -90,8 +86,6 @@ public class BLEService extends Service {
 
 		startBLEGatt();
 
-		//StrictMode.ThreadPolicy policy=new StrictMode.ThreadPolicy.Builder().permitAll().build();
-		//StrictMode.setThreadPolicy(policy);
 		DownloadatServer();
 
 		return START_STICKY;
@@ -158,7 +152,7 @@ public class BLEService extends Service {
 
 	/** serverに対してクラブごとに全てのBLEの情報をおくる**/
 	private void UploadtoServer(final Clubmonitor club){
-		mHandler.postDelayed(new Runnable() {
+		mBackGroundHandler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
 				MediaType JSON = MediaType.parse("application/json; charset=utf-8");
@@ -208,7 +202,7 @@ public class BLEService extends Service {
 
 	/**serverから定期的に部活ごとに平均温度と湿度、STATを受け取ってClublistのClubmonitorそれぞれに入れ込む処理**/
 	private void DownloadatServer(){
-		mHandler.postDelayed(new Runnable() {
+		mBackGroundHandler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
 				for (Clubmonitor club: clubList) {
@@ -262,9 +256,16 @@ public class BLEService extends Service {
 	public void onCreate(){
 		super.onCreate();
 		mMessenger = new Messenger(new MessageHandler(this.getApplicationContext()));
+		initGattCallBack();
+		mHandlerThread = new HandlerThread(BLE_THREAD);
+		mBackGroundHandler = new Handler(mHandlerThread.getLooper());
 	}
 
-
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		mHandlerThread.quit();
+	}
 
 	@Override
 	public IBinder onBind(Intent intent) {
