@@ -18,7 +18,7 @@
         android:layout_weight="1"></ListView>
 
     <com.beardedhen.androidbootstrap.BootstrapButton
-        android:id="@+id/addjoinbutton"
+        android:id="@+id/deletedevicebutton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="除去"

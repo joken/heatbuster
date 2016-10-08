@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 	private static ArrayList<Clubmonitor> BLEService_ClubMonitor;
 	private static Boolean mustDownBLEClubs=false;
 	private static Boolean musthogehoge=false;
+	private static Boolean MyDialogSucceed=false;
 
 	private MainActivity activity=this;
 
@@ -185,12 +186,21 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 				startActivityForResult(intent, PAIRING_REQUEST_CODE);
 				return true;
 			case R.id.reverce_one:
+				Intent intent1 = new Intent(getApplication(), RemoveAnyDevice.class);
+				intent1.putExtra("GID", clubAdapter.clubmonitorsList.get(currentClub).getGid());
 				return true;
 			case R.id.reverce_all:
 				return true;
 			case R.id.delete:
-				deleteClubinServer deleteclub = new deleteClubinServer(clubAdapter.clubmonitorsList.get(currentClub));
-				deleteclub.execute();
+				new DialogTemplate.Builder(activity)
+						.message(clubAdapter.clubmonitorsList.get(currentClub).getName()+"の監視を停止してもいいですか?")
+						.positive("OK")
+						.negative("キャンセル")
+						.show();
+				if (MyDialogSucceed){
+					deleteClubinServer deleteclub = new deleteClubinServer(clubAdapter.clubmonitorsList.get(currentClub));
+					deleteclub.execute();
+				}
 				return true;
 			default:
 				return super.onContextItemSelected(item);
@@ -373,12 +383,12 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
 	@Override
 	public void onMyDialogSucceeded(int requestCode, int resultCode, Bundle params) {
-
+		MyDialogSucceed = true;
 	}
 
 	@Override
 	public void onMyDialogCancelled(int requestCode, Bundle params) {
-
+		MyDialogSucceed = false;
 	}
 
 	static class MessageHandler extends Handler{
@@ -409,132 +419,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 			}
 		}
 
-	}
-
-	/** Serverに指定された部活の端末データを全て送信する **/
-	class UploadClubJSON extends AsyncTask<Void, Void, Boolean> {
-		public final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-		OkHttpClient client = new OkHttpClient();
-		private String gid;
-		private String json;
-
-		UploadClubJSON(String gid,String json){
-			this.gid=gid;
-			this.json=json;
-		}
-
-		String post(String url) throws IOException{
-			RequestBody body = 	RequestBody.create(JSON,json);
-			Request request = new Request.Builder()
-					.url(url)
-					.post(body)
-					.build();
-			Response response = client.newCall(request).execute();
-			return response.body().string();
-		}
-
-		@Override
-		protected Boolean doInBackground(Void... params) {
-			String query = "http://mofutech.net:4545/group/"+gid+"/mod/update";
-			try{
-				post(query);
-				return true;
-			}catch (Exception e){
-				e.printStackTrace();
-				return false;
-			}
-		}
-	}
-
-	/** 送信用のJSONを作成する **/
-	public String MakingJson(ArrayList<CheckBoxItem> conDeviceList){
-		// jsonデータの作成
-		JSONObject jsonOneData;
-
-		try {
-			jsonOneData = new JSONObject();
-			jsonOneData.put("token", Hawk.get("token"));
-
-			JSONArray itemArray = new JSONArray();
-			for (CheckBoxItem conDevice : conDeviceList) {
-				jsonOneData = new JSONObject();
-				jsonOneData.put("mac", conDevice.getSerial());
-				jsonOneData.put("temp", conDevice.getTemple());
-				jsonOneData.put("wet", conDevice.getHumid());
-				jsonOneData.put("stat", conDevice.getStat());
-				itemArray.put(jsonOneData);
-			}
-			jsonOneData.put("element",itemArray);
-
-		}catch (Exception e){
-			e.printStackTrace();
-			return "";
-		}
-		return jsonOneData.toString();
-	}
-
-	/**Serverからクラブごとの平均値と部内温度最高評価を受信する**/
-	class DownloadClubStats extends AsyncTask<Void, Void, Boolean> {
-		OkHttpClient client = new OkHttpClient();
-
-		private String gid;
-		private Clubmonitor club;
-
-		DownloadClubStats(String gid,Clubmonitor club){
-			this.gid=gid;
-			this.club=club;
-		}
-
-		String run(String url) throws IOException {
-			Request request = new Request.Builder()
-					.url(url)
-					.build();
-
-			Response response = client.newCall(request).execute();
-			return response.body().string();
-		}
-
-		@Override
-		protected Boolean doInBackground(Void... params) {
-			String query = "http://mofutech.net:4545/group/"+gid+"/mod/status";
-			try{
-				downparce(club,run(query));
-				return true;
-			}catch (Exception e){
-				e.printStackTrace();
-				return false;
-			}
-		}
-	}
-
-	/** serverから受信したJSONの解析及びオブジェクト(部活)の更新 **/
-	public void downparce(Clubmonitor club,String jsondata){
-		try {
-			JSONObject item = new JSONObject(jsondata);
-			if (item.getString("success") == "true"){
-				JSONObject item2 = item.getJSONObject("result");
-				club.setClubTemp(Float.valueOf(item2.getString("temp")));
-				club.setTempIncreaseRate(Float.valueOf(item2.getString("wet")));
-				switch (item2.getString("stat")){
-					case "EMER":
-						club.setSelfStatus(TemperatureStatus.Emergency);
-						Intent i = new Intent(getApplicationContext(),WorningActivity.class);
-						i.putExtra("CLUBNAME",club.getName());
-						startActivity(i);
-						break;
-					case "WARN":
-						club.setSelfStatus(TemperatureStatus.Warning);
-						break;
-					case "SAFE":
-						club.setSelfStatus(TemperatureStatus.Safe);
-						break;
-				}
-			}else{
-				Log.d("DownloadStat:","何一つ得られませんでした");
-			}
-		}catch (Exception e){
-			e.printStackTrace();
-		}
 	}
 
 	public void UpdateClubView(Clubmonitor club){
@@ -615,7 +499,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 		protected void onPreExecute() {
 			super.onPreExecute();
 			this.dialog = new DialogTemplate.Builder(activity)
-					.message("serverと通信しています")
+					.message("部活の監視を停止しています")
 					.isProgress(true)
 					.show();
 		}
