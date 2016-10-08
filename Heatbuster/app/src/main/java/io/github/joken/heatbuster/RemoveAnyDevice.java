@@ -80,6 +80,7 @@ public class RemoveAnyDevice extends AppCompatActivity implements ServiceConnect
     @Override
     public void onServiceDisconnected(ComponentName componentName) {
         mMessenger = null;
+        unbindService(this);
     }
 
     private void getDeviceListRequest(){

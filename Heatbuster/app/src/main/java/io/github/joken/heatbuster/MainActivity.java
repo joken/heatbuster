@@ -327,7 +327,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 	private void logout(){
 		Logout logoutAsync = new Logout();
 		logoutAsync.execute();
-		//TODO logoutする
 	}
 
 	private void showToast(String text){
@@ -345,6 +344,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 	@Override
 	public void onServiceDisconnected(ComponentName componentName) {
 		mMessenger = null;
+		unbindService(this);
 	}
 
 	public void sendToken(String token){
@@ -479,7 +479,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 		@Override
 		protected void onPostExecute(final Boolean success){
 			Hawk.deleteAll();
-			//TODO: ここにはBLEとのコネクションを全部切ってサービスをfinish()する処理が入りそう。
+			Intent it = new Intent(getApplicationContext(), BLEService.class);
+			stopService(it);
 			dialog.dismiss();
 			finish();
 		}
