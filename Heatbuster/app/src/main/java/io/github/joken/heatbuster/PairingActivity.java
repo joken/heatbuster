@@ -105,8 +105,16 @@ public class PairingActivity extends AppCompatActivity {
 			public void onLeScan(BluetoothDevice bluetoothDevice, int i, byte[] bytes) {
 				CheckBoxItem item = new CheckBoxItem(bluetoothDevice.getName());
 				item.setDevice(bluetoothDevice);
-				if(!checkAdaper.checkBoxItemsList.contains(item)){
+				if(checkAdaper.checkBoxItemsList.isEmpty()){
 					checkAdaper.checkBoxItemsList.add(item);
+					checkAdaper.notifyDataSetChanged();
+				}else{
+					for(CheckBoxItem adapterItem : checkAdaper.checkBoxItemsList){
+						if(!adapterItem.getSerial().equals(item.getSerial())){
+							checkAdaper.checkBoxItemsList.add(item);
+							checkAdaper.notifyDataSetChanged();
+						}
+					}
 				}
 			}
 		};
