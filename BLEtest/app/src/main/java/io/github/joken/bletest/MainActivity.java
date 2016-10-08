@@ -219,10 +219,12 @@ public class MainActivity extends AppCompatActivity {
             byte[] raw_data = characteristic.getValue();
             Log.i(TAG, "data = "  + "温度[1]" +raw_data[1]+"温度[2]" +raw_data[2]+"emergency"+raw_data[3]+"指数部byte"+raw_data[4]
             +"水蒸気量データ[6]"+raw_data[6]+"水蒸気量データ[7]"+raw_data[7]+"水蒸気量データ[8]"+raw_data[8]+"指数部byte"+raw_data[9]);
-            Log.i(TAG,""+raw_data[2]);
-            Log.i(TAG,""+raw_data[1]);
-            String piyo = ""+raw_data[2]+raw_data[1];
-            Log.i(TAG,String.valueOf(Integer.parseInt(piyo,16)));
+            Float temple = ((float)Integer.parseInt(""+raw_data[2]+raw_data[1],16))*0.1f;
+            Float wid = ((float) Integer.parseInt(""+raw_data[8]+raw_data[7]+raw_data[6],16))*0.1f;
+            Boolean emer = (Integer.parseInt(""+raw_data[3],16)==1);
+            Log.i(TAG,temple.toString());
+            Log.i(TAG,wid.toString());
+            Log.i(TAG,emer.toString());
             byte[] templebyte0 = Arrays.copyOfRange(raw_data,1,3);
             byte[] templebyte1 = Arrays.copyOfRange(raw_data,4,5);
             byte[] templebyte = new byte[templebyte0.length+templebyte1.length];

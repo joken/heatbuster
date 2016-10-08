@@ -17,6 +17,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.os.StrictMode;
 import android.util.Log;
 
 import com.orhanobut.hawk.Hawk;
@@ -88,6 +89,10 @@ public class BLEService extends Service {
 		}
 
 		startBLEGatt();
+
+		StrictMode.ThreadPolicy policy=new StrictMode.ThreadPolicy.Builder().permitAll().build();
+		StrictMode.setThreadPolicy(policy);
+		DownloadatServer();
 
 		return START_STICKY;
 	}
@@ -202,31 +207,34 @@ public class BLEService extends Service {
 	}
 
 	/**serverから定期的に部活ごとに平均温度と湿度、STATを受け取ってClublistのClubmonitorそれぞれに入れ込む処理**/
-	private void DownloadatServer(final Clubmonitor club){
+	private void DownloadatServer(){
 		mHandler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				OkHttpClient client = new OkHttpClient();
-				String url = "http://mofutech.net:4545/group/"+club.getGid()+"/mod/status?token="+Hawk.get("token");
-				try{
-					Request request = new Request.Builder()
-							.url(url)
-							.build();
+				for (Clubmonitor club: clubList) {
+					OkHttpClient client = new OkHttpClient();
+					String url = "http://mofutech.net:4545/group/" + club.getGid() + "/mod/status?token=" + Hawk.get("token");
+					try {
+						Request request = new Request.Builder()
+								.url(url)
+								.build();
 
-					Response response = client.newCall(request).execute();
-					String responseJson = response.body().string();
-					JsonInputtoClub(club,responseJson);
-				}catch (Exception e){
-					e.printStackTrace();
+						Response response = client.newCall(request).execute();
+						String responseJson = response.body().string();
+						Log.i("結果",responseJson);
+						JsonInputtoClub(club, responseJson);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
 			}
-		},SERVER_DOWNLOAD_DELAY);
+		},500);
 	}
 	/**1部活ごとに平均温度と湿度、STATを受け取って引数の部活に入れ込んであげる処理**/
 	private void JsonInputtoClub(Clubmonitor club,String jsondata){
 		try {
 			JSONObject item = new JSONObject(jsondata);
-			if (item.getString("success") == "true"){
+			if (item.getString("success").equals("true")){
 				JSONObject item2 = item.getJSONObject("result");
 				club.setClubTemp(Float.valueOf(item2.getString("temp")));
 				club.setTempIncreaseRate(Float.valueOf(item2.getString("wet")));
@@ -255,6 +263,8 @@ public class BLEService extends Service {
 		super.onCreate();
 		mMessenger = new Messenger(new MessageHandler(this.getApplicationContext()));
 	}
+
+
 
 	@Override
 	public IBinder onBind(Intent intent) {

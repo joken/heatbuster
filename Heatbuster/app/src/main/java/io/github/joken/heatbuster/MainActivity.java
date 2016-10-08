@@ -71,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 	private Messenger mMessenger,replyMessenger;
 	private static ArrayList<Clubmonitor> BLEService_ClubMonitor;
 	private static Boolean mustDownBLEClubs=false;
+	private static Boolean musthogehoge=false;
 
 	private MainActivity activity=this;
 
@@ -123,9 +124,14 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 		viewUpdatehandler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				if( mustDownBLEClubs){sendClubListRequest(); mustDownBLEClubs=false;}
+				if( mustDownBLEClubs){sendClubListRequest(); mustDownBLEClubs=false; musthogehoge=true;}
+				if(musthogehoge){sendClubListRequest();}
 				if (!(BLEService_ClubMonitor.isEmpty())) {
 					for (Clubmonitor club : BLEService_ClubMonitor) {
+						if (club.getSelfStatus() == TemperatureStatus.Emergency){
+							Intent intent = new Intent(getApplication(), WorningActivity.class);
+							intent.putExtra("CLUBNAME", clubAdapter.clubmonitorsList.get(currentClub).getName());
+						}
 						UpdateClubView(club);
 					}
 				}
@@ -183,8 +189,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 			case R.id.reverce_all:
 				return true;
 			case R.id.delete:
-				Intent intent_delete = new Intent(getApplication(),DeleteClubActivity.class);
-				startActivity(intent_delete);
+				deleteClubinServer deleteclub = new deleteClubinServer(clubAdapter.clubmonitorsList.get(currentClub));
+				deleteclub.execute();
 				return true;
 			default:
 				return super.onContextItemSelected(item);
@@ -581,6 +587,56 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 			//TODO: ここにはBLEとのコネクションを全部切ってサービスをfinish()する処理が入りそう。
 			dialog.dismiss();
 			finish();
+		}
+	}
+
+	class deleteClubinServer extends AsyncTask<Void, Void, Boolean> {
+		OkHttpClient client;
+		Clubmonitor club;
+		private DialogTemplate dialog;
+
+		public deleteClubinServer(Clubmonitor club) {
+			super();
+			client = new OkHttpClient();
+			this.club = club;
+		}
+
+		void run(String url) throws IOException {
+			Request request = new Request.Builder()
+					.url(url)
+					.build();
+
+			Response response = client.newCall(request).execute();
+			response.body().string();
+			//TODO: 遅れなかった時の処理を書いていません
+		}
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			this.dialog = new DialogTemplate.Builder(activity)
+					.message("serverと通信しています")
+					.isProgress(true)
+					.show();
+		}
+
+		@Override
+		protected Boolean doInBackground(Void... params) {
+			String query = "http://mofutech.net:4545/group/" + club.getGid() + "/leave?token=" + Hawk.get("token");
+			try {
+				run(query);
+			} catch (Exception e) {
+				e.printStackTrace();
+				return false;
+			}
+			return true;
+		}
+
+		@Override
+		protected void onPostExecute(final Boolean success)
+		{
+			this.dialog.dismiss();
+			//TODO:BLEdeviceから削除する処理
 		}
 	}
 
