@@ -45,7 +45,8 @@ public class BLEService extends Service {
 	public static final int CLUBLIST_REQUEST = 45454545;//clubListを要求されたときのID
 	public static final int JOIN_CLUB = 993;//部活動追加時のID
 
-	private static final int SERVER_DOWNLOAD_DELAY = 10000;//鯖と通信する頻度(msec)
+	private static final int SERVER_CONNECT_DELAY = 10000;//鯖と通信する頻度(msec)
+	private static final int BLE_CONNECT_DELAY = 10000;//BLE端末と通信する頻度(msec)
 	public static final String BLE_THREAD = "BLE-Thread";//スレッドにつく名前(Tag)
 	private static final String SERVICE_UUID = "1d180fbd-dd5b-4ca1-ac1b-abbb699afb46";
 
@@ -53,7 +54,7 @@ public class BLEService extends Service {
 	private Handler mBackGroundHandler;//Timer用 runnableをpost(送信)するブツ
 	private HandlerThread mHandlerThread;//runnableをrun(実行)するブツ 別スレッド実行
 	private static String token;//LoginToken
-	private static ArrayList<Clubmonitor> clubList;//監視リスト
+	private static ArrayList<Clubmonitor> clubList;//監視リスト(Group)
 	private BluetoothAdapter mBluetoothAdapter;
 	private BluetoothGattCharacteristic mBluetoothGattCharacteristic;
 	private BluetoothGattDescriptor mDescritor;
@@ -84,9 +85,10 @@ public class BLEService extends Service {
 			sendBroadcast(startIntent);
 		}
 
-		startBLEGatt();
+		startBLEGatt();//BLEのconnect操作Task(Background)
 
-		DownloadatServer();
+		StartUpLoadData();//ServerへのUploadTask(
+		DownloadatServer();//ServerへのDownloadTask(Background)
 
 		return START_STICKY;
 	}
@@ -133,44 +135,73 @@ public class BLEService extends Service {
 
 			@Override
 			public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-				CheckBoxItem bleDeveice = new CheckBoxItem(gatt.getDevice().getName());
+				CheckBoxItem bleDeviceData = new CheckBoxItem(gatt.getDevice().getName());
 				byte[] raw_data = characteristic.getValue();
 				Float temple = ((float)Integer.parseInt(""+raw_data[2]+raw_data[1],16))*0.1f;
 				Float wid = ((float) Integer.parseInt(""+raw_data[8]+raw_data[7]+raw_data[6],16))*0.1f;
 				Boolean emer = (Integer.parseInt(""+raw_data[3],16)==1);
-				bleDeveice.setTemple(temple);
-				bleDeveice.setHumid(wid);
-				bleDeveice.setEmer_flag(emer);
-				//TODO 実際にテストして
+				bleDeviceData.setTemple(temple);
+				bleDeviceData.setHumid(wid);
+				bleDeviceData.setEmer_flag(emer);
+
+				for(Clubmonitor monitor : clubList){
+					for(CheckBoxItem item : monitor.getDeviceList()){
+						if(item.getSerial().equals(bleDeviceData.getSerial())){//bleDeviceDataのある場所をさがす
+							clubList.get(clubList.indexOf(monitor)).getDeviceList()//該当clubのデバイスリスト
+									.set(monitor.getDeviceList().indexOf(item), bleDeviceData);//該当デバイスのDataを置換
+						}
+					}
+				}
 			}
 		};
 	}
 
 	private void startBLEGatt(){
-		//TODO 別スレッドで監視する
-	}
-
-	/** serverに対してクラブごとに全てのBLEの情報をおくる**/
-	private void UploadtoServer(final Clubmonitor club){
 		mBackGroundHandler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-				OkHttpClient client = new OkHttpClient();
-				String url = "http://mofutech.net:4545/group/"+club.getGid()+"/mod/update";
-				RequestBody body = 	RequestBody.create(JSON,MakingJson(club.getDeviceList()));
-				Request request = new Request.Builder()
-						.url(url)
-						.post(body)
-						.build();
-				try {
-					Response response = client.newCall(request).execute();
-					response.body().string();
-				}catch (Exception e) {
-					e.printStackTrace();
+				for(Clubmonitor monitor : clubList){
+					for(CheckBoxItem item : monitor.getDeviceList()){
+						item.getDevice().connectGatt(getApplicationContext(), true, mGattCallback).connect();
+					}
 				}
 			}
-		},SERVER_DOWNLOAD_DELAY);
+		}, BLE_CONNECT_DELAY);
+	}
+
+	/**
+	 * Serverに対して一定期間ごとにclublist全体の情報を送信する
+	 * */
+	private void StartUpLoadData(){
+		mBackGroundHandler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				for(Clubmonitor monitor : clubList){
+					UploadtoServer(monitor);
+				}
+			}
+		}, SERVER_CONNECT_DELAY);
+	}
+
+	/**
+	 * serverに対してクラブごとに全てのBLEの情報をおくる
+	 * メインスレッドで実行しないこと!!!(ネットワーク通信が発生します)
+	 * */
+	private void UploadtoServer(final Clubmonitor club){
+		MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+		OkHttpClient client = new OkHttpClient();
+		String url = "http://mofutech.net:4545/group/"+club.getGid()+"/mod/update";
+		RequestBody body = 	RequestBody.create(JSON,MakingJson(club.getDeviceList()));
+		Request request = new Request.Builder()
+				.url(url)
+				.post(body)
+				.build();
+		try {
+			Response response = client.newCall(request).execute();
+			response.body().string();
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**1部活のデバイスリストを受け取ると送信用のJSONを吐く機械**/
@@ -222,7 +253,7 @@ public class BLEService extends Service {
 					}
 				}
 			}
-		},SERVER_DOWNLOAD_DELAY);
+		}, SERVER_CONNECT_DELAY);
 	}
 	/**1部活ごとに平均温度と湿度、STATを受け取って引数の部活に入れ込んであげる処理**/
 	private void JsonInputtoClub(Clubmonitor club,String jsondata){
@@ -250,6 +281,20 @@ public class BLEService extends Service {
 		}catch (Exception e){
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * clubのGIDに紐付いたデバイスリストを返す。
+	 * @param gid 探したいclubのgid
+	 * @return gidに該当するclubのデバイスリスト。該当するものがなければnull
+	 * */
+	private ArrayList<CheckBoxItem> getDevicesByGID(String gid){
+		for(Clubmonitor monitor : clubList){
+			if(monitor.getGid().equals(gid)){
+				return monitor.getDeviceList();
+			}
+		}
+		return null;
 	}
 
 	@Override
@@ -284,7 +329,8 @@ public class BLEService extends Service {
 		public void handleMessage(Message msg){
 			switch (msg.what){
 				case BLE_ADD_DEVICE:
-					clubList.get(msg.getData().getInt(CLUB_INDEX)).setDeviceList((ArrayList<CheckBoxItem>)msg.getData().getSerializable(BLE_DEVICE));
+					ArrayList<CheckBoxItem> devices = (ArrayList<CheckBoxItem>)msg.getData().getSerializable(BLE_DEVICE);
+					clubList.get(msg.getData().getInt(CLUB_INDEX)).setDeviceList(devices);
 					break;
 				case TOKEN_ADD:
 					token = (String)msg.obj;
