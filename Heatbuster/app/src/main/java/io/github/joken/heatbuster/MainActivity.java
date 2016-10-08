@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 	private static Boolean mustDownBLEClubs=false;
 	private static Boolean musthogehoge=false;
 	private static Boolean MyDialogSucceed=false;
+	private static final int VIEW_UPDATE_DELAY = 5000;//clublistの要求間隔(msec)
 
 	private MainActivity activity=this;
 
@@ -136,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 						UpdateClubView(club);
 					}
 				}
-				viewUpdatehandler.postDelayed(this, 100);
+				viewUpdatehandler.postDelayed(this, VIEW_UPDATE_DELAY);
 			}
 		}, 100);
 	}
