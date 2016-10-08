@@ -190,6 +190,17 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 				intent1.putExtra("GID", clubAdapter.clubmonitorsList.get(currentClub).getGid());
 				return true;
 			case R.id.reverce_all:
+				new DialogTemplate.Builder(activity)
+						.message(clubAdapter.clubmonitorsList.get(currentClub).getName()+"の部員の全ての監視を解除してもよいですか。")
+						.positive("OK")
+						.negative("キャンセル")
+						.show();
+				if (MyDialogSucceed){
+					Message message = Message.obtain(null, BLEService.BLE_ADD_DEVICE, new ArrayList<CheckBoxItem>());
+					replyMessenger = new Messenger(new Handler());
+					message.replyTo = replyMessenger;
+					sendMessage(message);
+				}
 				return true;
 			case R.id.delete:
 				new DialogTemplate.Builder(activity)
