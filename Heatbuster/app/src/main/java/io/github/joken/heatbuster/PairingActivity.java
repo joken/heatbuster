@@ -103,15 +103,6 @@ public class PairingActivity extends AppCompatActivity {
 		mLeScanCallBack = new BluetoothAdapter.LeScanCallback() {
 			@Override
 			public void onLeScan(BluetoothDevice bluetoothDevice, int i, byte[] bytes) {
-				//ParcelUuid[] uuids = bluetoothDevice.getUuids();
-				//StringBuilder builder = new StringBuilder();
-				//for(int n = 0; n < uuids.length; n++){
-				//	builder.append(uuids[n].toString());
-				//	if(n < uuids.length - 1){
-				//		builder.append("-");
-				//	}
-				//}
-				//String parsedUUID = builder.toString();
 				CheckBoxItem item = new CheckBoxItem(bluetoothDevice.getName());
 				item.setDevice(bluetoothDevice);
 				if(!checkAdaper.checkBoxItemsList.contains(item)){
