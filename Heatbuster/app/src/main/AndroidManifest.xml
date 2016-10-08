@@ -44,9 +44,6 @@
             android:exported="false" />
 
         <activity android:name=".WorningActivity" />
-        <activity
-            android:name=".DeleteClubActivity"
-            android:label="監視をやめる部活動を選んでください" />
         <activity android:name=".RemoveAnyDevice"></activity>
     </application>
 

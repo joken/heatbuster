@@ -89,50 +89,50 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
         finish();
     }
 
-    @Override
-    public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-        mMessenger = new Messenger(iBinder);
-        replyMessenger = new Messenger(new MessageClubListHandler());
-        sendClubListRequest();
-    }
-
-    @Override
-    public void onServiceDisconnected(ComponentName componentName) {
-        mMessenger = null;
-    }
-
-    private void sendClubListRequest(){
-        Message message = Message.obtain(null, BLEService.CLUBLIST_REQUEST);
-        message.replyTo = replyMessenger;
-        sendMessage(message);
-    }
-
-    private void sendMessage(Message msg){
-        try{
-            mMessenger.send(msg);
-        }catch (RemoteException e){
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void onMyDialogSucceeded(int requestCode, int resultCode, Bundle params) {
-
-    }
-
-    @Override
-    public void onMyDialogCancelled(int requestCode, Bundle params) {
-
-    }
-
-    static class MessageClubListHandler extends Handler{
         @Override
-        @SuppressWarnings("unchecked")
-        public void handleMessage(Message msg) {
-            BLEService_ClubMonitor = (ArrayList<Clubmonitor>)msg.obj;
-            getClubListAsync.execute();
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            mMessenger = new Messenger(iBinder);
+            replyMessenger = new Messenger(new MessageClubListHandler());
+            sendClubListRequest();
         }
-    }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mMessenger = null;
+        }
+
+        private void sendClubListRequest(){
+            Message message = Message.obtain(null, BLEService.CLUBLIST_REQUEST);
+            message.replyTo = replyMessenger;
+            sendMessage(message);
+        }
+
+        private void sendMessage(Message msg){
+            try{
+                mMessenger.send(msg);
+            }catch (RemoteException e){
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onMyDialogSucceeded(int requestCode, int resultCode, Bundle params) {
+
+        }
+
+        @Override
+        public void onMyDialogCancelled(int requestCode, Bundle params) {
+
+        }
+
+        static class MessageClubListHandler extends Handler{
+            @Override
+            @SuppressWarnings("unchecked")
+            public void handleMessage(Message msg) {
+                BLEService_ClubMonitor = (ArrayList<Clubmonitor>)msg.obj;
+                getClubListAsync.execute();
+            }
+        }
 
     class getClubList extends AsyncTask<Void, Void, Boolean> {
         OkHttpClient client;
