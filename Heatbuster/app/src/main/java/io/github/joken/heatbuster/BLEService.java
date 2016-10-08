@@ -68,7 +68,11 @@ public class BLEService extends Service {
 	public int onStartCommand(Intent intent, int flags, int startId){
 		Hawk.init(getApplicationContext()).build();
 		token = Hawk.get("token");//Tokenをセット
-		clubList = new ArrayList<>();
+		if(Hawk.get("clublist") == null){
+			clubList = new ArrayList<>();
+		}else{
+			clubList = Hawk.get("clublist");
+		}
 
 		// Initializes Bluetooth adapter.
 		final BluetoothManager bluetoothManager =
@@ -161,7 +165,9 @@ public class BLEService extends Service {
 		mBackGroundHandler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
+				if(clubList.isEmpty())return;
 				for(Clubmonitor monitor : clubList){
+					if(monitor.getDeviceList() == null)return;
 					for(CheckBoxItem item : monitor.getDeviceList()){
 						item.getDevice().connectGatt(getApplicationContext(), true, mGattCallback).connect();
 					}
@@ -178,6 +184,7 @@ public class BLEService extends Service {
 			@Override
 			public void run() {
 				for(Clubmonitor monitor : clubList){
+					if(monitor.getDeviceList() == null)return;
 					UploadtoServer(monitor);
 				}
 			}
@@ -304,12 +311,14 @@ public class BLEService extends Service {
 		mMessenger = new Messenger(new MessageHandler(this.getApplicationContext()));
 		initGattCallBack();
 		mHandlerThread = new HandlerThread(BLE_THREAD);
+		mHandlerThread.start();//startしておかないとgetLooper()でnullが返る。
 		mBackGroundHandler = new Handler(mHandlerThread.getLooper());
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		Hawk.put("clublist", clubList);
 		mHandlerThread.quit();
 	}
 
