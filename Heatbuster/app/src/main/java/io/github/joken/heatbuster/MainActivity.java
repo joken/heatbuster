@@ -112,7 +112,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 	}
 
 	private void initClubListView() {
-		//TODO GroupListの取得で部活動を追加する
 		BLEService_ClubMonitor = new ArrayList<>();
 		clubAdapter = new ClubmonitorAdapter(MainActivity.this, BLEService_ClubMonitor);
 
