@@ -90,8 +90,8 @@ public class BLEService extends Service {
 
 		startBLEGatt();
 
-		StrictMode.ThreadPolicy policy=new StrictMode.ThreadPolicy.Builder().permitAll().build();
-		StrictMode.setThreadPolicy(policy);
+		//StrictMode.ThreadPolicy policy=new StrictMode.ThreadPolicy.Builder().permitAll().build();
+		//StrictMode.setThreadPolicy(policy);
 		DownloadatServer();
 
 		return START_STICKY;
@@ -228,7 +228,7 @@ public class BLEService extends Service {
 					}
 				}
 			}
-		},500);
+		},SERVER_DOWNLOAD_DELAY);
 	}
 	/**1部活ごとに平均温度と湿度、STATを受け取って引数の部活に入れ込んであげる処理**/
 	private void JsonInputtoClub(Clubmonitor club,String jsondata){
