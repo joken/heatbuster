@@ -8,10 +8,14 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
+import android.os.Messenger;
 import android.os.ParcelUuid;
+import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -41,6 +45,8 @@ public class PairingActivity extends AppCompatActivity {
 	private CheckboxListAdapter checkAdaper;
 	private BluetoothAdapter mBluetoothAdapter;
 	private BluetoothAdapter.LeScanCallback mLeScanCallBack;
+	private Messenger mMessenger,replyMessenger;
+	private static ArrayList<String> BLEService_DeviceNames;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +102,29 @@ public class PairingActivity extends AppCompatActivity {
 					setResult(RESULT_CANCELED);
 					finish();
 				}
+		}
+	}
+
+	public void getDevicesName(){
+		Message msg = Message.obtain(null, BLEService.GET_DEVICE, getIntent().getStringExtra("GID"));
+		replyMessenger = new Messenger(new Handler());
+		msg.replyTo=replyMessenger;
+		sendMessage(msg);
+	}
+
+	private void sendMessage(Message msg) {
+		try {
+			mMessenger.send(msg);//送信
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+	}
+
+	static class MessageDeviceNameHandler extends Handler {
+		@Override
+		@SuppressWarnings("unchecked")
+		public void handleMessage(Message msg) {
+			BLEService_DeviceNames = (ArrayList<String>)msg.obj;
 		}
 	}
 
@@ -183,9 +212,9 @@ public class PairingActivity extends AppCompatActivity {
 
 			JSONArray itemArray = new JSONArray();
 			for (CheckBoxItem Device : DeviceList) {
-				jsonOneData = new JSONObject();
-				jsonOneData.put("mac", Device.getSerial());
-				itemArray.put(jsonOneData);
+				JSONObject jsonOneData1 = new JSONObject();
+				jsonOneData1.put("mac", Device.getSerial());
+				itemArray.put(jsonOneData1);
 			}
 			jsonOneData.put("element",itemArray);
 

@@ -325,9 +325,11 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 	}
 
 	private void logout(){
+		for(Clubmonitor club:BLEService_ClubMonitor) {
+			sendPairList(new ArrayList<CheckBoxItem>(), currentClub);
+		}
 		Logout logoutAsync = new Logout();
 		logoutAsync.execute();
-		//TODO logoutする
 	}
 
 	private void showToast(String text){
@@ -479,7 +481,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 		@Override
 		protected void onPostExecute(final Boolean success){
 			Hawk.deleteAll();
-			//TODO: ここにはBLEとのコネクションを全部切ってサービスをfinish()する処理が入りそう。
 			dialog.dismiss();
 			finish();
 		}

@@ -45,6 +45,7 @@ public class BLEService extends Service {
 	public static final int CLUBLIST_REQUEST = 45454545;//clubListを要求されたときのID
 	public static final int JOIN_CLUB = 993;//部活動追加時のID
 	public static final int DEVICELIST_REQUEST = 1270;//デバイスリスト要求時のID
+	public static final int GET_DEVICE = 3423;
 
 	private static final int SERVER_CONNECT_DELAY = 10000;//鯖と通信する頻度(msec)
 	private static final int BLE_CONNECT_DELAY = 10000;//BLE端末と通信する頻度(msec)
