@@ -99,6 +99,7 @@ public class JoinclubActivity extends AppCompatActivity implements ServiceConnec
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
             mMessenger = null;
+            unbindService(this);
         }
 
         private void sendClubListRequest(){
