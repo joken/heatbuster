@@ -379,6 +379,13 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 		sendMessage(msg);
 	}
 
+	private void sendClubListRequest(){
+		Message message = Message.obtain(null, BLEService.CLUBLIST_REQUEST);
+		replyMessenger = new Messenger(new MessageHandler());
+		message.replyTo = replyMessenger;
+		sendMessage(message);
+	}
+
 	private void sendMessage(Message msg) {
 		try {
 			mMessenger.send(msg);//送信
@@ -386,13 +393,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 			e.printStackTrace();
 			Toast.makeText(this.getApplicationContext(), "子機が正常に追加できませんでした。", Toast.LENGTH_SHORT).show();
 		}
-	}
-
-	private void sendClubListRequest(){
-		Message message = Message.obtain(null, BLEService.CLUBLIST_REQUEST);
-		replyMessenger = new Messenger(new MessageHandler());
-		message.replyTo = replyMessenger;
-		sendMessage(message);
 	}
 
 	@Override

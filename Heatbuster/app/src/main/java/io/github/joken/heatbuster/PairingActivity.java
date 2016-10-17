@@ -112,6 +112,17 @@ public class PairingActivity extends AppCompatActivity {
 		sendMessage(msg);
 	}
 
+	/**この関数はBLEService.javaに対してonLeScanを起動するよう呼びかける関数です。**/
+	public void requestScan(){
+		Bundle bundle = new Bundle();
+		bundle.putSerializable(BLEService.BLESCAN_REQUEST_GID, getIntent().getStringExtra("GID"));
+		Message msg = Message.obtain(null,BLEService.BLESCAN_REQUEST);
+		msg.setData(bundle);
+		replyMessenger = new Messenger(new Handler());
+		msg.replyTo=replyMessenger;
+		sendMessage(msg);
+	}
+
 	private void sendMessage(Message msg) {
 		try {
 			mMessenger.send(msg);//送信

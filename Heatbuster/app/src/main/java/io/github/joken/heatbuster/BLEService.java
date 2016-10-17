@@ -2,6 +2,7 @@ package io.github.joken.heatbuster;
 
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
@@ -40,12 +41,14 @@ public class BLEService extends Service {
 	public static final String BLE_DEVICE = "connection_devices";//接続対象デバイスリストのキー
 	public static final String CLUB_INDEX = "club_index";//BT端末追加時の部活動指定キー
 	public static final String JOINING_CLUB = "joining_club";//部活動追加時のlistキー
+	public static final String BLESCAN_REQUEST_GID = "blescan_request_gid"; //onLeScan()要求時のgis受け渡しキー
 	public static final int BLE_ADD_DEVICE = 931;//BT端末追加のMessageID
 	public static final int TOKEN_ADD = 514114;//Token追加のMessageID
 	public static final int CLUBLIST_REQUEST = 45454545;//clubListを要求されたときのID
 	public static final int JOIN_CLUB = 993;//部活動追加時のID
 	public static final int DEVICELIST_REQUEST = 1270;//デバイスリスト要求時のID
 	public static final int GET_DEVICE = 3423;
+	public static final int BLESCAN_REQUEST = 3658;//onLeScanの起動を要求時のID
 
 	private static final int SERVER_CONNECT_DELAY = 10000;//鯖と通信する頻度(msec)
 	private static final int BLE_CONNECT_DELAY = 10000;//BLE端末と通信する頻度(msec)
@@ -57,10 +60,15 @@ public class BLEService extends Service {
 	private HandlerThread mHandlerThread;//runnableをrun(実行)するブツ 別スレッド実行
 	private static String token;//LoginToken
 	private static ArrayList<Clubmonitor> clubList;//監視リスト(Group)
-	private BluetoothAdapter mBluetoothAdapter;
+	private static BluetoothAdapter.LeScanCallback mLeScanCallBack;
+	private static BluetoothAdapter mBluetoothAdapter;
 	private BluetoothGattCharacteristic mBluetoothGattCharacteristic;
 	private BluetoothGattDescriptor mDescritor;
 	private BluetoothGattCallback mGattCallback;
+
+	//temps
+	private static String temp_gid;
+	private static ArrayList<CheckBoxItem> temp_pairableList;
 
 	public BLEService() {
 	}
@@ -306,6 +314,40 @@ public class BLEService extends Service {
 		return null;
 	}
 
+
+	/**接続可能なデバイスかどうか判断してpairablelistに入れる処理**/
+	private void initScanCallBack(final String gid){
+		mLeScanCallBack = new BluetoothAdapter.LeScanCallback(){
+			@Override
+			public void onLeScan(BluetoothDevice bluetoothDevice, int i, byte[] bytes){
+				Boolean flag = false;
+				CheckBoxItem scanedItem = new CheckBoxItem(bluetoothDevice.getName());
+				scanedItem.setDevice(bluetoothDevice);
+
+				ArrayList<CheckBoxItem> temp_gidDevices = getDevicesByGID(gid);
+				if (!temp_gidDevices.isEmpty()){
+					for (CheckBoxItem gidDevice: temp_gidDevices){
+						if (gidDevice.getSerial().equals(scanedItem.getSerial())){
+							flag = true;
+							break;
+						}
+					}
+				}
+				if (!temp_pairableList.isEmpty()){
+					for (CheckBoxItem pairable: temp_pairableList){
+						if (pairable.getSerial().equals(scanedItem.getSerial())){
+							flag = true;
+							break;
+						}
+					}
+				}
+				if (!flag){
+					temp_pairableList.add(scanedItem);
+				}
+			}
+		};
+	}
+
 	@Override
 	public void onCreate(){
 		super.onCreate();
@@ -367,6 +409,10 @@ public class BLEService extends Service {
 						}
 					}
 					break;
+				case BLESCAN_REQUEST:
+					temp_gid = (String) msg.getData().getSerializable(BLESCAN_REQUEST_GID);
+					mBluetoothAdapter.startLeScan(mLeScanCallBack);
+
 			}
 		}
 
