@@ -48,7 +48,8 @@ public class BLEService extends Service {
 	public static final int JOIN_CLUB = 993;//部活動追加時のID
 	public static final int DEVICELIST_REQUEST = 1270;//デバイスリスト要求時のID
 	public static final int GET_DEVICE = 3423;
-	public static final int BLESCAN_REQUEST = 3658;//onLeScanの起動を要求時のID
+	public static final int BLESCAN_REQUEST = 3658;//startScanの起動を要求時のID
+	public static final int BLESCAN_STOP_REQUEST = 3659;//stopScanをする要求時のID
 
 	private static final int SERVER_CONNECT_DELAY = 10000;//鯖と通信する頻度(msec)
 	private static final int BLE_CONNECT_DELAY = 10000;//BLE端末と通信する頻度(msec)
@@ -412,7 +413,10 @@ public class BLEService extends Service {
 				case BLESCAN_REQUEST:
 					temp_gid = (String) msg.getData().getSerializable(BLESCAN_REQUEST_GID);
 					mBluetoothAdapter.startLeScan(mLeScanCallBack);
-
+					break;
+				case BLESCAN_STOP_REQUEST:
+					mBluetoothAdapter.stopLeScan(mLeScanCallBack);
+					break;
 			}
 		}
 

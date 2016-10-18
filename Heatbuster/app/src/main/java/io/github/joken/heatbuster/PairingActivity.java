@@ -112,12 +112,20 @@ public class PairingActivity extends AppCompatActivity {
 		sendMessage(msg);
 	}
 
-	/**この関数はBLEService.javaに対してonLeScanを起動するよう呼びかける関数です。**/
+	/**この関数はBLEService.javaに対してstartScanを起動するよう呼びかける関数です。**/
 	public void requestScan(){
 		Bundle bundle = new Bundle();
 		bundle.putSerializable(BLEService.BLESCAN_REQUEST_GID, getIntent().getStringExtra("GID"));
 		Message msg = Message.obtain(null,BLEService.BLESCAN_REQUEST);
 		msg.setData(bundle);
+		replyMessenger = new Messenger(new Handler());
+		msg.replyTo=replyMessenger;
+		sendMessage(msg);
+	}
+
+	/**この関数はBLEService.javaに対してstopScanを起動するよう呼びかける関数です。**/
+	public void requestScanStop(){
+		Message msg = Message.obtain(null,BLEService.BLESCAN_STOP_REQUEST);
 		replyMessenger = new Messenger(new Handler());
 		msg.replyTo=replyMessenger;
 		sendMessage(msg);
